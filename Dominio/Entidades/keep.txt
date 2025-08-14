@@ -1,0 +1,1 @@
+﻿Acá van todas las entidades pertenecientes al esquema de DB

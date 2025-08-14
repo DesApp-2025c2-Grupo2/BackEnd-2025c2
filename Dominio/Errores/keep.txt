@@ -1,0 +1,1 @@
+﻿Acá van todos los errores personalizados que se deseen implementar para cualquier capa
