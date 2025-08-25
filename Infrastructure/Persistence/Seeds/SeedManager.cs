@@ -1,8 +1,8 @@
-﻿using Aplicacion.Utilidades;
-using Infraestructura.Persistencia.Configuraciones;
+﻿using Application.Utilities;
+using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infraestructura.Persistencia.Seeds;
+namespace Infrastructure.Persistence.Seeds;
 
 public static class SeedManager
 {

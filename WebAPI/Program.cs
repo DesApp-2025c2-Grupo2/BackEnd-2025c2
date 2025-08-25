@@ -1,7 +1,7 @@
-﻿using Aplicacion.Utilidades;
-using Infraestructura.Persistencia.Configuraciones;
-using Infraestructura.Persistencia.Seeds;
-using Infraestructura.Persistencia.StoredProcedures;
+﻿using Application.Utilities;
+using Infrastructure.Persistence.Configurations;
+using Infrastructure.Persistence.Seeds;
+using Infrastructure.Persistence.StoredProcedures;
 using Microsoft.EntityFrameworkCore;
 using WebAPI;
 
@@ -20,6 +20,9 @@ builder.Services.AddRepositories();
 
 // Inyección de endpoints
 builder.Services.AddControllers();
+
+// Inyección de logger
+builder.Services.AddSingleton<IProjectLogger, ProjectLogger>();
 
 // Configuracion de CORS
 builder.Services.AddCors(options =>

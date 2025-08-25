@@ -1,6 +1,6 @@
 ﻿//using Dominio.Entidades;
 
-namespace Infraestructura.Persistencia.Seeds;
+namespace Infrastructure.Persistence.Seeds;
 
 public static class TableSeeds
 {

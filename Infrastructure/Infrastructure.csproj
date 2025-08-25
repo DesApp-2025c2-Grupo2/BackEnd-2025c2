@@ -12,16 +12,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="8.23.90" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.9.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aplicacion\Aplicacion.csproj" />
+    <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Persistencia\StoredProcedures\Scripts\" />
+    <Folder Include="Persistence\StoredProcedures\Scripts\" />
   </ItemGroup>
 
 </Project>

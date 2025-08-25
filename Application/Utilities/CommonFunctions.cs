@@ -1,4 +1,4 @@
-﻿namespace Aplicacion.Utilidades;
+﻿namespace Application.Utilities;
 
 public class CommonFunctions
 {

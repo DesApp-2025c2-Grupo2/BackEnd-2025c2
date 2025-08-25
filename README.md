@@ -52,10 +52,10 @@ EF Core está integrado en la capa de Infraestructura, bajo la carpeta Persisten
 ##### 🔌 Configuración
 DbContext se configura e inyecta desde el proyecto WebAPI, donde se define la cadena de conexión en appsettings.json y se realiza la configuración del contexto en Program.cs.
 
-Las migraciones se ubican dentro de Infraestructura/Persistencia/Migrations y se generan con el comando:
+Las migraciones se ubican dentro de Infrastructure/Persistence/Migrations y se generan con el comando:
 
 ```
-dotnet ef migrations add <Nombre> --project Infraestructura --startup-project WebAPI --output-dir Persistencia/Migrations
+dotnet ef migrations add <Nombre> --project Infrastructure --startup-project WebAPI --output-dir Persistence/Migrations
 ```
 
 >⚠️ Asegurarse de tener instalado el paquete Microsoft.EntityFrameworkCore.Design en el proyecto WebAPI (startup project). <br>
