@@ -58,7 +58,7 @@ using (var serviceScope = app.Services.CreateScope())
     context.Database.Migrate();
     logger.LogInformation("Base de datos migrada correctamente.");
     await SeedManager.InitializeAsync(context, logger); // Orquestadora de Seeds
-    await SPManager.InitializeAsync(context, logger); // Orquestadora de Stored Procedures
+    //await SPManager.InitializeAsync(context, logger); // Orquestadora de Stored Procedures
 }
 // Acá hubo que adaptar la compatibilidad de la versión de Swagger
 app.UseSwagger(options =>
