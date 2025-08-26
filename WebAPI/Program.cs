@@ -1,7 +1,7 @@
 ﻿using Application.Utilities;
 using Infrastructure.Persistence.Configurations;
 using Infrastructure.Persistence.Seeds;
-using Infrastructure.Persistence.StoredProcedures;
+//using Infrastructure.Persistence.StoredProcedures;
 using Microsoft.EntityFrameworkCore;
 using WebAPI;
 
