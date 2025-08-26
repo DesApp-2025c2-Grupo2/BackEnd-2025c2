@@ -1,7 +1,7 @@
-﻿using Aplicacion.Utilidades;
-using Infraestructura.Persistencia.Configuraciones;
-using Infraestructura.Persistencia.Seeds;
-using Infraestructura.Persistencia.StoredProcedures;
+﻿using Application.Utilities;
+using Infrastructure.Persistence.Configurations;
+using Infrastructure.Persistence.Seeds;
+using Infrastructure.Persistence.StoredProcedures;
 using Microsoft.EntityFrameworkCore;
 using WebAPI;
 
@@ -20,6 +20,9 @@ builder.Services.AddRepositories();
 
 // Inyección de endpoints
 builder.Services.AddControllers();
+
+// Inyección de logger
+builder.Services.AddSingleton<IProjectLogger, ProjectLogger>();
 
 // Configuracion de CORS
 builder.Services.AddCors(options =>
@@ -55,7 +58,7 @@ using (var serviceScope = app.Services.CreateScope())
     context.Database.Migrate();
     logger.LogInformation("Base de datos migrada correctamente.");
     await SeedManager.InitializeAsync(context, logger); // Orquestadora de Seeds
-    await SPManager.InitializeAsync(context, logger); // Orquestadora de Stored Procedures
+    //await SPManager.InitializeAsync(context, logger); // Orquestadora de Stored Procedures
 }
 // Acá hubo que adaptar la compatibilidad de la versión de Swagger
 app.UseSwagger(options =>

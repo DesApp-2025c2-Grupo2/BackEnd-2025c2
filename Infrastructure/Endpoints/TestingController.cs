@@ -1,7 +1,7 @@
-using Aplicacion.Utilidades;
+using Application.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Infraestructura.Endpoints;
+namespace Infrastructure.Endpoints;
 
 [ApiController]
 [Route("[controller]")] 
