@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
@@ -19,7 +20,7 @@ public class Persona
     [Required]
     public DateTime FechaNacimiento { get; set; }
     [Required]
-    public int Parentesco { get; set; } // 1: Titular, 2: Cónyuge, 3: Hijo, 4: FamiliarACargo
+    public Parentesco Parentesco { get; set; } // 1: Titular, 2: Cónyuge, 3: Hijo, 4: FamiliarACargo
     [Required]
     [ForeignKey(nameof(Afiliado))]
     public int AfiliadoId { get; set; }

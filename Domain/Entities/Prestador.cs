@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
@@ -9,7 +10,7 @@ public class Prestador
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
-    public int Rol { get; set; } // 0: Centro Médico, 1: Profesional Independiente, 2: Profesional de Centro Médico
+    public RolMedico Rol { get; set; } // 0: Centro Médico, 1: Profesional Independiente, 2: Profesional de Centro Médico
     [Required]
     [MaxLength(128)]
     public string NombreCompleto { get; set; }

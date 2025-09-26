@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
@@ -13,7 +14,7 @@ public class HorarioAtencion
     public int AgendaId { get; set; }
     public Agenda Agenda { get; set; }
     [Required]
-    public int DiaAtencion { get; set; }
+    public DiaAtencion DiaDeAtencion { get; set; }
     [Required]
     public DateTime HoraInicio { get; set; }
     [Required]
