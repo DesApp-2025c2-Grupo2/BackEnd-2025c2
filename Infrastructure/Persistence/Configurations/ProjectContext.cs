@@ -79,7 +79,7 @@ public class ProjectContext : DbContext
         .WithMany(st => st.Personas)
         .UsingEntity<Dictionary<string, object>>(
             "HISTORIAL_TERAPEUTICO", // Nombre de la tabla intermedia
-            j => j.HasOne<SituacionTerapeutica>().WithMany().HasForeignKey("SITUCACIONTERAPEUTICAID"),
+            j => j.HasOne<SituacionTerapeutica>().WithMany().HasForeignKey("SITUACIONTERAPEUTICAID"),
             j => j.HasOne<Persona>().WithMany().HasForeignKey("PERSONAID")
         );
         // Configuración de la relación muchos a muchos entre Prestador y Especialidad
@@ -87,7 +87,7 @@ public class ProjectContext : DbContext
         .HasMany(p => p.Especialidades)
         .WithMany(e => e.Prestadores)
         .UsingEntity<Dictionary<string, object>>(
-            "PRESTADORES_ESPECIALIDADES", // Nombre de la tabla intermedia
+            "ESPECIALIZACIONES", // Nombre de la tabla intermedia
             j => j.HasOne<Especialidad>().WithMany().HasForeignKey("ESPECIALIDADID"),
             j => j.HasOne<Prestador>().WithMany().HasForeignKey("PRESTADORID")
         );
