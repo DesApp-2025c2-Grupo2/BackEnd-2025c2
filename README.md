@@ -1,5 +1,100 @@
 ﻿# BackEnd
 
+## 🔀 Estrategia de brancheo y flujo de trabajo
+
+| Branch                    | Branch Origen |  Branch Destino |
+|---------------------------|---------------|-----------------|
+| main                      |               |                 |
+| develop                   | main          | main            |
+| feature/[ID]-[CardTitle]  | develop       | develop         |
+| hotfix/[ID]-[CardTitle]   | develop       | develop         |
+| document/[description]    | develop       | develop         |
+
+### Política de Branching e Integración
+
+- **main** es la rama principal donde se alojan todos los fuentes de "producción". Se llega a la misma mediante una aprobación y por medio de un Pull Request (PR) desde la rama de develop unicamente.
+- **develop** contiene la integración de todos los desarrollos que estén realizando. Se llega a estar rama mediante un PR. Cada desarrollador debe salir de esta rama a una propia para realizar modificaciones.
+- **feature/...** son los cambios realizados por cada integrante del equipo de desarrollo. Estos cambios en su mayoria representan las tarjetas o tareas descriptas en el backlog del proyecto.
+- **hotfix/...** son los cambios que se realizan para corregir errores o bugs detectados en la rama develop. Estos cambios deben ser lo mas acotados posibles y no deben incluir nuevas funcionalidades.
+- **document/...** son los cambios que se realizan para actualizar o mejorar la documentación del proyecto. Estos cambios pueden incluir la actualización de archivos README, la adición de diagramas, etc.
+
+### Nomenclatura
+
+**Branches de desarrollo**:
+
+- feature/[ID]-[CardTitle]
+- hotfix/[ID]-[CardTitle]
+
+**Donde**:
+
+- **ID**: Identificador único de la tarjeta o tarea (por ejemplo, un número o código).
+- **CardTitle**: Una breve descripción de la tarea o funcionalidad (por ejemplo, "CrearMigraciones", "CorregirValidacionEmail").
+
+```
+Ejemplos: 
+    feature/5-CrearMigraciones
+    hotfix/12-CorregirValidacionEmail
+```
+
+**Branches de documentación**:
+
+- document/[description]
+
+**Donde**:
+
+- **description**: Una breve descripción del cambio en la documentación (por ejemplo, "EstrategiasDeBrancheo", "DiagramaDeArquitectura").
+
+```
+Ejemplos:
+    document/EstrategiasDeBrancheo
+    document/DiagramaDeArquitectura
+```
+
+### Diagrama de flujo de Branches/Pull Requests
+
+
+```mermaid
+graph BT
+    D[develop] ---> M[main]
+    F1[hotfix/ID-CardTitle] <--->  D[develop]
+    F2[feature/ID-CardTitle] <--->  D[develop]
+    F3[document/description] <--->  D[develop] 
+```
+
+**Reglas adicionales:**
+
+1. Los titulos de los PullRequest a develop deben ser el número y nombre de la tarjeta/issue del backlog. Ejemplo:
+
+    ```
+    4 - Entidades del MER
+    ```
+2. Los titulos de los PullRequest a main deben ser el número y nombre del sprint cerrado. Ejemplo:
+    ```
+    Sprint 1 - Estructura inicial del proyecto
+    ```
+
+### Convenciones de Commits
+
+Se utiliza la convención de commits basada en Conventional Commits para mantener un historial claro y estructurado. Los tipos de commits permitidos son:
+
+| Tipo de Commit | Descripción                                          | Ejemplo                                 |
+|----------------|------------------------------------------------------|-----------------------------------------|
+| feat           | Nueva funcionalidad o característica                 | Agregar entidades de dominio.<br> Implementar endpoint get lista de Especialidades      |
+| fix            | Corrección de errores                                | Corregir error en la validación de numero de documento. <br> Deshabilitar validacion de roles medicos. |
+| docs           | Cambios en la documentación                          | Actualizar README con instrucciones de despliegue. |
+| refactor       | Cambios en el código que no afectan la funcionalidad | Refactorizar DTO de Afiliado.<br> Mejorar estructura de carpetas. |
+| perf           | Mejoras de rendimiento                               | Optimizar consulta de agendas de turnos. |
+| test           | Añadir o modificar pruebas                           | Agregar pruebas unitarias para el servicio de situaciones terapeuticas. |
+| chore          | Cambios en tareas de mantenimiento                   | Actualizar dependencias de NuGet.<br> Agregar migracion de nueva entidad |
+| wip            | Trabajo en progreso (cambios incompletos)            | Agregar interfaz de servicio. <br> Agregar metodo auxiliar de validacion. |
+
+
+**Reglas adicionales:**
+
+1. Los commits al hacer merge desde las ramas feature hacia develop deben ser de tipo feat, de esta forma reflejan el desarrollo de una nueva funcionalidad completa que se agregará a develop.
+2. Los commits al hacer merge desde develop a main representan un cambio de versión de la app y el cierre de sprint llevarán un BREAKING CHANGE en la descripción del commit.
+3. Los commits de ramas document deben ser de tipo docs para no alterar el historial de desarrollo.
+
 ## 🚀 Stack Tecnológico
 Este proyecto utiliza el siguiente conjunto de tecnologías:
 
@@ -78,24 +173,10 @@ Esto permite que la base de datos y su esquema se creen o actualicen automática
 
 ##### 📦 Paquetes NuGet Utilizados
 >Microsoft.EntityFrameworkCore (8.0.13)<br>
->Microsoft.EntityFrameworkCore.Design (8.0.13)<br>
->Pomelo.EntityFrameworkCore.MySql (8.0.3)
+Microsoft.EntityFrameworkCore.Design (8.0.13)<br>
+Pomelo.EntityFrameworkCore.MySql (8.0.3)<br>
+Oracle.EntityFrameworkCore (8.23.90)<br>
+Oracle.ManagedDataAccess.Core (23.9.1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<br><br><br><br><br>
 ###### ...
