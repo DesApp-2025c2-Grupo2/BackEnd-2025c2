@@ -9,6 +9,8 @@ public class Persona
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
+    public int NumeroIntegrante { get; set; }
+    [Required]
     [MaxLength(64)]
     public string Nombre { get; set; }
     [Required]
@@ -17,8 +19,7 @@ public class Persona
     [Required]
     public DateTime FechaNacimiento { get; set; }
     [Required]
-    [MaxLength(32)]
-    public string Parentesco { get; set; }
+    public int Parentesco { get; set; } // 1: Titular, 2: Cónyuge, 3: Hijo, 4: FamiliarACargo
     [Required]
     [ForeignKey(nameof(Afiliado))]
     public int AfiliadoId { get; set; }

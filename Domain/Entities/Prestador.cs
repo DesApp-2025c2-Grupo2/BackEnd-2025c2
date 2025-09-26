@@ -9,8 +9,7 @@ public class Prestador
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
-    [MaxLength(16)]
-    public string Rol { get; set; } // 0: Centro Médico, 1: Profesional Independiente, 2: Profesional de Centro Médico
+    public int Rol { get; set; } // 0: Centro Médico, 1: Profesional Independiente, 2: Profesional de Centro Médico
     [Required]
     [MaxLength(128)]
     public string NombreCompleto { get; set; }

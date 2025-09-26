@@ -13,8 +13,7 @@ public class HorarioAtencion
     public int AgendaId { get; set; }
     public Agenda Agenda { get; set; }
     [Required]
-    [MaxLength(16)]
-    public string DiaAtencion { get; set; }
+    public int DiaAtencion { get; set; }
     [Required]
     public DateTime HoraInicio { get; set; }
     [Required]

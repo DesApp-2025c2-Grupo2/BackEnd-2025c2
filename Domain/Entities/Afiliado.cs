@@ -9,6 +9,8 @@ public class Afiliado
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
+    public int NumeroAfiliado { get; set; }
+    [Required]
     public int TitularID { get; set; }
     [Required]
     [ForeignKey(nameof(PlanMedico))]
