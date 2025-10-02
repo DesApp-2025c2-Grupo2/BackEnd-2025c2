@@ -34,7 +34,7 @@ public class PlanMedicoController : ControllerBase
     }
 
     [HttpPost("save")]
-    public async Task<IActionResult> AddAsync([FromBody] PlanMedicoRequest planMedicoCreateDto, [FromQuery] int id)
+    public async Task<IActionResult> AddAsync([FromBody] PlanMedicoRequest planMedicoCreateDto, [FromQuery] int id = 0)
     {
         try
         {

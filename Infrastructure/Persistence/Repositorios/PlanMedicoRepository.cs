@@ -57,6 +57,7 @@ public class PlanMedicoRepository : IPlanMedicoRepository
             else
             {
                 plan.Baja = null;
+                plan.Alta = DateTime.Now.Date;
             }
             await context.SaveChangesAsync();
             return true;

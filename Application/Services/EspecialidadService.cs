@@ -13,6 +13,7 @@ public class EspecialidadService : IEspecialidadService
     {
         this.repository = repository;
     }
+
     public async Task<EspecialidadResponse> AddAsync(EspecialidadRequest especialidadRequest)
     {
         Especialidad especialidad = new Especialidad
@@ -52,7 +53,12 @@ public class EspecialidadService : IEspecialidadService
 
     public async Task<bool> ToggleStatusAsync(int id)
     {
-        return await repository.ToggleStatusAsync(id);
+        bool opExitosa = await repository.ToggleStatusAsync(id);
+        if (!opExitosa)
+        {
+            throw new Exception("No se pudo cambiar el estado de la Especialidad");
+        }
+        return opExitosa;
     }
 
     public async Task<EspecialidadResponse> UpdateAsync(int id, EspecialidadRequest especialidadRequest)

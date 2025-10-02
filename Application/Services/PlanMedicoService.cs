@@ -21,6 +21,7 @@ public class PlanMedicoService : IPlanMedicoService
             Descripcion = planMedicoCreateDto.descripcion,
             CostoMensual = planMedicoCreateDto.costoMensual,
             Moneda = planMedicoCreateDto.moneda,
+            Alta = DateTime.Now.Date,
             Baja = null
         };
         PlanMedico createdPlanMedico = await repository.AddAsync(planMedico);
@@ -49,7 +50,7 @@ public class PlanMedicoService : IPlanMedicoService
                 descripcion = planMedico.Descripcion,
                 costoMensual = planMedico.CostoMensual,
                 moneda = planMedico.Moneda,
-                activa = planMedico.Baja == null
+                activa = planMedico.Baja == null || planMedico.Baja > DateTime.Now.Date
             });
         });
         return response;
