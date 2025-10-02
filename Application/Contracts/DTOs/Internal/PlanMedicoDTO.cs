@@ -2,7 +2,6 @@
 
 public class PlanMedicoDTO
 {
-    public int Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public int CostoMensual { get; set; } = 0;
     public string Moneda { get; set; } = "ARS"; // ISO 4217 code

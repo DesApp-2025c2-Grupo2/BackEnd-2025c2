@@ -12,6 +12,7 @@ public static class DependencyContainer
         // Ejemplo:
         //services.AddScoped(typeof(IUserService), typeof(UserService));
         services.AddScoped(typeof(ISituacionTerapeuticaService), typeof(SituacionTerapeuticaService));
+        services.AddScoped(typeof(IPlanMedicoService), typeof(PlanMedicoService));
         return services;
     }
     public static IServiceCollection AddRepositories(this IServiceCollection services)
@@ -19,6 +20,7 @@ public static class DependencyContainer
         // Ejemplo:
         //services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
         services.AddScoped(typeof(ISituacionTerapeuticaRepository), typeof(SituacionTerapeuticaRepository));
+        services.AddScoped(typeof(IPlanMedicoRepository), typeof(PlanMedicoRepository));
         return services;
     }
 
