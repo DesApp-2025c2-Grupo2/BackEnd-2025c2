@@ -42,15 +42,15 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
     }
 
-    public async Task<SituacionTerapeutica> ToggleStatusAsync(SituacionTerapeutica entity)
+    public async Task<bool> ToggleStatusAsync(int id)
     {
-        SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(entity.Id);
-        if (situacion == null)
-        {
-            throw new Exception("Situacion Terapeutica no encontrada");
-        }
         try
         {
+            SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(id);
+            if (situacion == null)
+            {
+                throw new Exception("Situacion Terapeutica no encontrada");
+            }
             if (situacion.Baja == null)
             {
                 situacion.Baja = DateTime.Now.Date;
@@ -62,7 +62,7 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
             }
             dbContext.SituacionesTerapeuticas.Update(situacion);
             await dbContext.SaveChangesAsync();
-            return situacion;
+            return true;
         }
         catch (Exception ex)
         {
@@ -72,13 +72,13 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
 
     public async Task<SituacionTerapeutica> UpdateAsync(SituacionTerapeutica entity)
     {
-        SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(entity.Id);
-        if (situacion == null)
-        {
-            throw new Exception("Situacion Terapeutica no encontrada");
-        }
         try
         {
+            SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(entity.Id);
+            if (situacion == null)
+            {
+                throw new Exception("Situacion Terapeutica no encontrada");
+            }
             situacion.Nombre = entity.Nombre;
             situacion.Descripcion = entity.Descripcion;
             dbContext.SituacionesTerapeuticas.Update(situacion);

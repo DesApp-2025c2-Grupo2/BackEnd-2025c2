@@ -5,11 +5,8 @@ namespace Application.Contracts.Interfaces;
 
 public interface ISituacionTerapeuticaService
 {
-    // Define aquí los métodos que el servicio debe implementar
-    // Será un ABM (Alta, Baja, Modificación) de Situaciones Terapéuticas
-
-    SituacionesTerapeuticasResponse GetAll();
-    SituacionTerapeuticaResponse ToggleStatus(int id);
-    SituacionTerapeuticaResponse Update(int id, SituacionTerapeuticaRequest request);
-    SituacionTerapeuticaResponse Add(SituacionTerapeuticaRequest request);
+    Task<SituacionesTerapeuticasResponse> GetAllAsync();
+    Task<bool> ToggleStatusAsync(int id);
+    Task<SituacionTerapeuticaResponse> UpdateAsync(int id, SituacionTerapeuticaRequest request);
+    Task<SituacionTerapeuticaResponse> AddAsync(SituacionTerapeuticaRequest request);
 }

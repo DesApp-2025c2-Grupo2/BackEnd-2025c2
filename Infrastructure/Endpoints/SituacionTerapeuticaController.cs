@@ -19,101 +19,60 @@ public class SituacionTerapeuticaController : ControllerBase
         this.service = service;
     }
 
-
     [HttpGet("all")]
-    public ActionResult<SituacionesTerapeuticasResponse> GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        ActionResult<SituacionesTerapeuticasResponse> response = NotFound("No implementado");
         try
         {
-            SituacionesTerapeuticasResponse data = service.GetAll();
-            if (data == null || data.Count == 0)
-            {
-                response = NoContent();
-                logger.LogWarning("No se encontraron situaciones terapéuticas");
-            }
-            else
-            {
-                response = Ok(data);
-                logger.LogSuccess("Situaciones terapéuticas obtenidas exitosamente");
-            }
+            var result = await service.GetAllAsync();
+            logger.LogSuccess("Especialidades obtenidas exitosamente.");
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            logger.LogError("Error al obtener todas las situaciones terapeuticas", ex);
-            response = StatusCode(500, "Error interno del servidor");
+            logger.LogError("Error al obtener las Especialidades.", ex);
+            return StatusCode(500, "Error interno del servidor.");
         }
-        return response;
     }
 
-    // Baja y Reactivacion
-    [HttpPost("toggleStatus")]
-    public ActionResult<SituacionTerapeuticaResponse> ToggleStatus([FromQuery] int id)
+    [HttpPost("toggleStatus/{id}")]
+    public async Task<IActionResult> ToggleStatus(int id)
     {
-        ActionResult<SituacionTerapeuticaResponse> response = NotFound("No implementado");
         try
         {
-            SituacionTerapeuticaResponse? data = service.ToggleStatus(id);
-            if (data == null)
-            {
-                response = NotFound($"No se encontró la situación terapéutica con ID {id}");
-                logger.LogWarning($"No se encontró la situación terapéutica con ID {id} para cambiar su estado");
-            }
-            else
-            {
-                response = Ok(data);
-                logger.LogSuccess($"Se cambió el estado de la situación terapéutica con ID {id}");
-            }
+            var result = await service.ToggleStatusAsync(id);
+            logger.LogSuccess("Estado de la Situación Terapéutica cambiado exitosamente.");
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error al cambiar el estado de la situación terapéutica con ID {id}", ex);
-            response = StatusCode(500, "Error interno del servidor");
+            logger.LogError("Error al cambiar el estado de la Situación Terapéutica.", ex);
+            return StatusCode(500, "Error interno del servidor.");
         }
-        return response;
     }
 
-    // Alta y Modificacion
     [HttpPost("save")]
-    public ActionResult<SituacionTerapeuticaResponse> Save([FromBody] SituacionTerapeuticaRequest request, [FromQuery] int id = 0)
+    public async Task<IActionResult> Save([FromBody] SituacionTerapeuticaRequest request, [FromQuery] int id = 0)
     {
-        ActionResult<SituacionTerapeuticaResponse> response = NotFound("No implementado");
         try
         {
-            SituacionTerapeuticaResponse? data;
-            if (id > 0)
+            if (id == 0)
             {
-                data = service.Update(id, request);
-                if (data == null)
-                {
-                    response = NotFound($"No se encontró la situación terapéutica con ID {id}");
-                    logger.LogWarning($"No se encontró la situación terapéutica con ID {id} para actualizar");
-                }
-                else
-                {
-                    response = Ok(data);
-                }
+                var result = await service.AddAsync(request);
+                logger.LogSuccess("Situación Terapéutica agregada exitosamente.");
+                return Ok(result);
             }
             else
             {
-                data = service.Add(request);
-                if (data == null)
-                {
-                    response = BadRequest("No se pudo crear la nueva situación terapéutica");
-                    logger.LogWarning("No se pudo crear la nueva situación terapéutica");
-                }
-                else
-                {
-                    response = CreatedAtAction(nameof(Save), new { id = data.id }, data);
-                    logger.LogSuccess($"Se creó la nueva situación terapéutica con ID {data.id}");
-                }
+                var result = await service.UpdateAsync(id, request);
+                logger.LogSuccess("Situación Terapéutica actualizada exitosamente.");
+                return Ok(result);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error al guardar la situación terapéutica con ID {id}", ex);
-            response = StatusCode(500, "Error interno del servidor");
+            logger.LogError("Error al guardar la Situación Terapéutica.", ex);
+            return StatusCode(500, "Error interno del servidor.");
         }
-        return response;
     }
 }

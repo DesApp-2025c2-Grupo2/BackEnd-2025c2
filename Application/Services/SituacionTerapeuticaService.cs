@@ -14,9 +14,8 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
         this.repository = repository;
     }
 
-    public SituacionTerapeuticaResponse Add(SituacionTerapeuticaRequest request)
+    public async Task<SituacionTerapeuticaResponse> AddAsync(SituacionTerapeuticaRequest request)
     {
-        SituacionTerapeuticaResponse response;
         SituacionTerapeutica entity = new SituacionTerapeutica
         {
             Nombre = request.nombre,
@@ -24,56 +23,44 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
             Alta = DateTime.Now.Date,
             Baja = request.activa ? null : DateTime.Now.Date
         };
-        entity = repository.AddAsync(entity).Result;
-        response = new SituacionTerapeuticaResponse
+        entity = await repository.AddAsync(entity);
+        SituacionTerapeuticaResponse response = new SituacionTerapeuticaResponse
         {
             id = entity.Id,
             nombre = entity.Nombre,
             descripcion = entity.Descripcion,
-            activa = entity.Baja == null || entity.Baja > DateTime.Now.Date
+            activa = entity.Baja == null
         };
         return response;
     }
 
-    public SituacionesTerapeuticasResponse GetAll()
+    public async Task<SituacionesTerapeuticasResponse> GetAll()
     {
-        SituacionesTerapeuticasResponse response = new();
-        List<SituacionTerapeutica> entities = repository.GetAllAsync().Result;
-        entities.ForEach(entity =>
+        List<SituacionTerapeutica> situaciones = await repository.GetAllAsync();
+        SituacionesTerapeuticasResponse response = new SituacionesTerapeuticasResponse();
+        situaciones.ForEach(situacion =>
         {
             response.Add(new SituacionTerapeuticaResponse
             {
-                id = entity.Id,
-                nombre = entity.Nombre,
-                descripcion = entity.Descripcion,
-                activa = entity.Baja == null || entity.Baja > DateTime.Now.Date
+                id = situacion.Id,
+                nombre = situacion.Nombre,
+                descripcion = situacion.Descripcion,
+                activa = situacion.Baja == null || situacion.Baja > DateTime.Now.Date
             });
-        }); 
-        return response;
+        });
     }
 
-    public SituacionTerapeuticaResponse ToggleStatus(int id)
+    public async Task<bool> ToggleStatus(int id)
     {
-        SituacionTerapeuticaResponse? response;
-        SituacionTerapeutica? entity = repository.ToggleStatusAsync(new SituacionTerapeutica { Id = id }).Result;
-        if (entity == null)
+        bool opExitosa = await repository.ToggleStatusAsync(id);
+        if (!opExitosa)
         {
-            response = null;
+            throw new Exception("No se pudo cambiar el estado de la Situacion Terapeutica");
         }
-        else
-        {
-            response = new SituacionTerapeuticaResponse
-            {
-                id = entity.Id,
-                nombre = entity.Nombre,
-                descripcion = entity.Descripcion,
-                activa = entity.Baja == null || entity.Baja > DateTime.Now.Date
-            };
-        }
-        return response;
+        return opExitosa;
     }
 
-    public SituacionTerapeuticaResponse Update(int id, SituacionTerapeuticaRequest request)
+    public async Task<SituacionTerapeuticaResponse> Update(int id, SituacionTerapeuticaRequest request)
     {
         SituacionTerapeuticaResponse response;
         SituacionTerapeutica? entity = new SituacionTerapeutica
