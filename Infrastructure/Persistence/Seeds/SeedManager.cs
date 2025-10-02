@@ -8,18 +8,43 @@ public static class SeedManager
 {
     public static async Task InitializeAsync(ProjectContext context, IProjectLogger logger)
     {
-        //await SeedCategorias(context);
+        await SeedSituacionTerapeutica(context);
+        await SeedEspecialidades(context);
+        await SeedPlanesMedicos(context);
         logger.LogInformation("Seeds inicializados correctamente.");
     }
+    
+    
+    private static async Task SeedSituacionTerapeutica(ProjectContext context)
+    {
+        int cantidad = await context.SituacionesTerapeuticas.CountAsync();
+        if (cantidad == 0)
+        {
+            var situaciones = TableSeeds.SituacionesTerapeuticas();
+            await context.SituacionesTerapeuticas.AddRangeAsync(situaciones);
+            await context.SaveChangesAsync();
+        }
+    }
 
-    //private static async Task SeedCategorias(ProjectContext context)
-    //{
-    //    if (!await context.Categorias.AnyAsync()) // Validar si ya existen
-    //    {
-    //        var categorias = TableSeeds.Categorias();
-    //        await context.Categorias.AddRangeAsync(categorias);
-    //        await context.SaveChangesAsync();
-    //    }
-    //}
+    private static async Task SeedEspecialidades(ProjectContext context)
+    {
+        int cantidad = await context.Especialidades.CountAsync();
+        if (cantidad == 0)
+        {
+            var especialidades = TableSeeds.Especialidades();
+            await context.Especialidades.AddRangeAsync(especialidades);
+            await context.SaveChangesAsync();
+        }
+    }
 
+    private static async Task SeedPlanesMedicos(ProjectContext context)
+    {
+        int cantidad = await context.PlanesMedicos.CountAsync();
+        if (cantidad == 0)
+        {
+            var planes = TableSeeds.PlanesMedicos();
+            await context.PlanesMedicos.AddRangeAsync(planes);
+            await context.SaveChangesAsync();
+        }
+    }
 }
