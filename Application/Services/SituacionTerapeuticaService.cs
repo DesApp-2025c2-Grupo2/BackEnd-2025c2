@@ -34,7 +34,7 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
         return response;
     }
 
-    public async Task<SituacionesTerapeuticasResponse> GetAll()
+    public async Task<SituacionesTerapeuticasResponse> GetAllAsync()
     {
         List<SituacionTerapeutica> situaciones = await repository.GetAllAsync();
         SituacionesTerapeuticasResponse response = new SituacionesTerapeuticasResponse();
@@ -48,9 +48,10 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
                 activa = situacion.Baja == null || situacion.Baja > DateTime.Now.Date
             });
         });
+        return response;
     }
 
-    public async Task<bool> ToggleStatus(int id)
+    public async Task<bool> ToggleStatusAsync(int id)
     {
         bool opExitosa = await repository.ToggleStatusAsync(id);
         if (!opExitosa)
@@ -60,24 +61,22 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
         return opExitosa;
     }
 
-    public async Task<SituacionTerapeuticaResponse> Update(int id, SituacionTerapeuticaRequest request)
+    public async Task<SituacionTerapeuticaResponse> UpdateAsync(int id, SituacionTerapeuticaRequest request)
     {
-        SituacionTerapeuticaResponse response;
-        SituacionTerapeutica? entity = new SituacionTerapeutica
+        SituacionTerapeutica entity = new SituacionTerapeutica
         {
             Id = id,
             Nombre = request.nombre,
             Descripcion = request.descripcion,
-            Alta = DateTime.Now.Date,
             Baja = request.activa ? null : DateTime.Now.Date
         };
-        entity = repository.UpdateAsync(entity).Result;
-        response = new SituacionTerapeuticaResponse
+        entity = await repository.UpdateAsync(entity);
+        SituacionTerapeuticaResponse response = new SituacionTerapeuticaResponse
         {
             id = entity.Id,
             nombre = entity.Nombre,
             descripcion = entity.Descripcion,
-            activa = entity.Baja == null || entity.Baja > DateTime.Now.Date
+            activa = entity.Baja == null
         };
         return response;
     }

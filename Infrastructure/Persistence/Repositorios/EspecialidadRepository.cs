@@ -57,6 +57,7 @@ public class EspecialidadRepository : IEspecialidadRepository
             else
             {
                 especialidad.Baja = null;
+                especialidad.Alta = DateTime.Now.Date;
             }
             context.Especialidades.Update(especialidad);
             await context.SaveChangesAsync();

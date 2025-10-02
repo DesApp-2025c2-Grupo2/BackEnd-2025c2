@@ -25,12 +25,12 @@ public class SituacionTerapeuticaController : ControllerBase
         try
         {
             var result = await service.GetAllAsync();
-            logger.LogSuccess("Especialidades obtenidas exitosamente.");
+            logger.LogSuccess("Situaciones Terapeuticas obtenidas exitosamente.");
             return Ok(result);
         }
         catch (Exception ex)
         {
-            logger.LogError("Error al obtener las Especialidades.", ex);
+            logger.LogError("Error al obtener las Situaciones Terapeuticas.", ex);
             return StatusCode(500, "Error interno del servidor.");
         }
     }
