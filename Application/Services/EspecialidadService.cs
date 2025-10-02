@@ -45,7 +45,7 @@ public class EspecialidadService : IEspecialidadService
                 id = especialidad.Id,
                 nombre = especialidad.Nombre,
                 descripcion = especialidad.Descripcion,
-                activa = especialidad.Baja == null
+                activa = especialidad.Baja == null || especialidad.Baja > DateTime.Now.Date
             });
         });
         return response;
