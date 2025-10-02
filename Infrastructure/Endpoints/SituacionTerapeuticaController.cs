@@ -30,10 +30,12 @@ public class SituacionTerapeuticaController : ControllerBase
             if (data == null || data.Count == 0)
             {
                 response = NoContent();
+                logger.LogWarning("No se encontraron situaciones terapéuticas");
             }
             else
             {
                 response = Ok(data);
+                logger.LogSuccess("Situaciones terapéuticas obtenidas exitosamente");
             }
         }
         catch (Exception ex)
@@ -55,10 +57,12 @@ public class SituacionTerapeuticaController : ControllerBase
             if (data == null)
             {
                 response = NotFound($"No se encontró la situación terapéutica con ID {id}");
+                logger.LogWarning($"No se encontró la situación terapéutica con ID {id} para cambiar su estado");
             }
             else
             {
                 response = Ok(data);
+                logger.LogSuccess($"Se cambió el estado de la situación terapéutica con ID {id}");
             }
         }
         catch (Exception ex)
@@ -83,6 +87,7 @@ public class SituacionTerapeuticaController : ControllerBase
                 if (data == null)
                 {
                     response = NotFound($"No se encontró la situación terapéutica con ID {id}");
+                    logger.LogWarning($"No se encontró la situación terapéutica con ID {id} para actualizar");
                 }
                 else
                 {
@@ -95,10 +100,12 @@ public class SituacionTerapeuticaController : ControllerBase
                 if (data == null)
                 {
                     response = BadRequest("No se pudo crear la nueva situación terapéutica");
+                    logger.LogWarning("No se pudo crear la nueva situación terapéutica");
                 }
                 else
                 {
                     response = CreatedAtAction(nameof(Save), new { id = data.id }, data);
+                    logger.LogSuccess($"Se creó la nueva situación terapéutica con ID {data.id}");
                 }
             }
         }

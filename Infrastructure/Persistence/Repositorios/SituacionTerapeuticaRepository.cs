@@ -25,7 +25,6 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
         catch (Exception ex)
         {
-            // Aquí podríamos loguear el error si tuviéramos un logger
             throw new Exception("Error al agregar la Situacion Terapeutica", ex);
         }
     }
@@ -39,7 +38,6 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
         catch (Exception ex)
         {
-            // Aquí podríamos loguear el error si tuviéramos un logger
             throw new Exception("Error al obtener las Situaciones Terapeuticas", ex);
         }
     }
@@ -68,7 +66,6 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
         catch (Exception ex)
         {
-            // Aquí podríamos loguear el error si tuviéramos un logger
             throw new Exception("Error al actualizar el estado de la Situacion Terapeutica", ex);
         }
     }
@@ -90,7 +87,6 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
         catch (Exception ex)
         {
-            // Aquí podríamos loguear el error si tuviéramos un logger
             throw new Exception("Error al actualizar la Situacion Terapeutica", ex);
         }
     }
