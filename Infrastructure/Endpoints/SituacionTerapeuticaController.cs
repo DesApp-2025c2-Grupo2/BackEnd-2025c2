@@ -8,7 +8,7 @@ namespace Infrastructure.Endpoints;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("sterapeuticas")]
 public class SituacionTerapeuticaController : ControllerBase
 {
     private readonly IProjectLogger logger;
@@ -20,7 +20,7 @@ public class SituacionTerapeuticaController : ControllerBase
     }
 
 
-    [HttpGet("/all")]
+    [HttpGet("all")]
     public ActionResult<SituacionesTerapeuticasResponse> GetAll()
     {
         ActionResult<SituacionesTerapeuticasResponse> response = NotFound("No implementado");
@@ -45,7 +45,7 @@ public class SituacionTerapeuticaController : ControllerBase
     }
 
     // Baja y Reactivacion
-    [HttpPost("/toggleStatus")]
+    [HttpPost("toggleStatus")]
     public ActionResult<SituacionTerapeuticaResponse> ToggleStatus([FromQuery] int id)
     {
         ActionResult<SituacionTerapeuticaResponse> response = NotFound("No implementado");
@@ -70,7 +70,7 @@ public class SituacionTerapeuticaController : ControllerBase
     }
 
     // Alta y Modificacion
-    [HttpPost("/save")]
+    [HttpPost("save")]
     public ActionResult<SituacionTerapeuticaResponse> Save([FromBody] SituacionTerapeuticaRequest request, [FromQuery] int id = 0)
     {
         ActionResult<SituacionTerapeuticaResponse> response = NotFound("No implementado");

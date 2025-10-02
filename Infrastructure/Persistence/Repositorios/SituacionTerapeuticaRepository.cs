@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Persistence.Configurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositorios;
 
@@ -14,13 +15,13 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
     }
 
 
-    public Task<SituacionTerapeutica> AddAsync(SituacionTerapeutica entity)
+    public async Task<SituacionTerapeutica> AddAsync(SituacionTerapeutica entity)
     {
         try
         {
-            dbContext.SituacionesTerapeuticas.Add(entity);
-            dbContext.SaveChanges();
-            return Task.FromResult(entity);
+            await dbContext.SituacionesTerapeuticas.AddAsync(entity);
+            await dbContext.SaveChangesAsync();
+            return entity;
         }
         catch (Exception ex)
         {
@@ -29,12 +30,12 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
     }
 
-    public Task<List<SituacionTerapeutica>> GetAllAsync()
+    public async Task<List<SituacionTerapeutica>> GetAllAsync()
     {
         try
         {
-            List<SituacionTerapeutica> list = dbContext.SituacionesTerapeuticas.ToList();
-            return Task.FromResult(list);
+            List<SituacionTerapeutica> list = await dbContext.SituacionesTerapeuticas.ToListAsync();
+            return list;
         }
         catch (Exception ex)
         {
@@ -43,9 +44,9 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
     }
 
-    public Task<SituacionTerapeutica> ToggleStatusAsync(SituacionTerapeutica entity)
+    public async Task<SituacionTerapeutica> ToggleStatusAsync(SituacionTerapeutica entity)
     {
-        SituacionTerapeutica? situacion = dbContext.SituacionesTerapeuticas.Find(entity.Id);
+        SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(entity.Id);
         if (situacion == null)
         {
             throw new Exception("Situacion Terapeutica no encontrada");
@@ -62,8 +63,8 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
                 situacion.Alta = DateTime.Now.Date;
             }
             dbContext.SituacionesTerapeuticas.Update(situacion);
-            dbContext.SaveChangesAsync();
-            return Task.FromResult(situacion);
+            await dbContext.SaveChangesAsync();
+            return situacion;
         }
         catch (Exception ex)
         {
@@ -72,9 +73,9 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
     }
 
-    public Task<SituacionTerapeutica> UpdateAsync(SituacionTerapeutica entity)
+    public async Task<SituacionTerapeutica> UpdateAsync(SituacionTerapeutica entity)
     {
-        SituacionTerapeutica? situacion = dbContext.SituacionesTerapeuticas.Find(entity.Id);
+        SituacionTerapeutica? situacion = await dbContext.SituacionesTerapeuticas.FindAsync(entity.Id);
         if (situacion == null)
         {
             throw new Exception("Situacion Terapeutica no encontrada");
@@ -84,8 +85,8 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
             situacion.Nombre = entity.Nombre;
             situacion.Descripcion = entity.Descripcion;
             dbContext.SituacionesTerapeuticas.Update(situacion);
-            dbContext.SaveChangesAsync();
-            return Task.FromResult(situacion);
+            await dbContext.SaveChangesAsync();
+            return situacion;
         }
         catch (Exception ex)
         {
