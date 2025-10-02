@@ -43,13 +43,13 @@ public class PlanMedicoRepository : IPlanMedicoRepository
 
     public async Task<bool> ToggleStatusAsync(int id)
     {
-        PlanMedico? plan = await context.PlanesMedicos.FindAsync(id);
-        if (plan == null)
-        {
-            throw new Exception("Plan Medico no encontrado");
-        }
         try
         {
+            PlanMedico? plan = await context.PlanesMedicos.FindAsync(id);
+            if (plan == null)
+            {
+                throw new Exception("Plan Medico no encontrado");
+            }
             if (plan.Baja == null)
             {
                 plan.Baja = DateTime.Now.Date;
@@ -70,13 +70,13 @@ public class PlanMedicoRepository : IPlanMedicoRepository
 
     public async Task<PlanMedico> UpdateAsync(PlanMedico planMedico)
     {
-        PlanMedico? plan = await context.PlanesMedicos.FindAsync(planMedico.Id);
-        if (plan == null)
-        {
-            throw new Exception("Plan Medico no encontrado");
-        }
         try
         {
+            PlanMedico? plan = await context.PlanesMedicos.FindAsync(planMedico.Id);
+            if (plan == null)
+            {
+                throw new Exception("Plan Medico no encontrado");
+            }
             plan.Nombre = planMedico.Nombre;
             plan.Descripcion = planMedico.Descripcion;
             plan.CostoMensual = planMedico.CostoMensual;

@@ -35,7 +35,7 @@ public class SituacionTerapeuticaController : ControllerBase
         }
     }
 
-    [HttpPost("toggleStatus/{id}")]
+    [HttpPatch("toggleStatus/{id}")]
     public async Task<IActionResult> ToggleStatus(int id)
     {
         try
