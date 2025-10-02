@@ -79,6 +79,7 @@ public class EspecialidadRepository : IEspecialidadRepository
         {
             existingEspecialidad.Nombre = especialidad.Nombre;
             existingEspecialidad.Descripcion = especialidad.Descripcion;
+            existingEspecialidad.Baja = especialidad.Baja;
             context.Especialidades.Update(existingEspecialidad);
             await context.SaveChangesAsync();
             return existingEspecialidad;
