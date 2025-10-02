@@ -43,13 +43,13 @@ public class EspecialidadRepository : IEspecialidadRepository
 
     public async Task<bool> ToggleStatusAsync(int id)
     {
-        Especialidad? especialidad = await context.Especialidades.FindAsync(id);
-        if (especialidad == null)
-        {
-            throw new Exception("Especialidad no encontrada");
-        }
         try
         {
+            Especialidad? especialidad = await context.Especialidades.FindAsync(id);
+            if (especialidad == null)
+            {
+                throw new Exception("Especialidad no encontrada");
+            }
             if (especialidad.Baja == null)
             {
                 especialidad.Baja = DateTime.Now.Date;
@@ -70,13 +70,13 @@ public class EspecialidadRepository : IEspecialidadRepository
 
     public async Task<Especialidad> UpdateAsync(Especialidad especialidad)
     {
-        Especialidad? existingEspecialidad = await context.Especialidades.FindAsync(especialidad.Id);
-        if (existingEspecialidad == null)
-        {
-            throw new Exception("Especialidad no encontrada");
-        }
         try
         {
+            Especialidad? existingEspecialidad = await context.Especialidades.FindAsync(especialidad.Id);
+            if (existingEspecialidad == null)
+            {
+                throw new Exception("Especialidad no encontrada");
+            }
             existingEspecialidad.Nombre = especialidad.Nombre;
             existingEspecialidad.Descripcion = especialidad.Descripcion;
             existingEspecialidad.Baja = especialidad.Baja;
