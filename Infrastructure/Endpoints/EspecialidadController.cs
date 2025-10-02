@@ -1,4 +1,5 @@
-﻿using Application.Contracts.Interfaces;
+﻿using Application.Contracts.DTOs.Request;
+using Application.Contracts.Interfaces;
 using Application.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,7 +32,7 @@ public class EspecialidadController : ControllerBase
         }
     }
     [HttpPost("save")]
-    public async Task<IActionResult> AddAsync([FromBody] Application.Contracts.DTOs.Request.EspecialidadRequest especialidadRequest, [FromQuery] int id)
+    public async Task<IActionResult> AddAsync([FromBody] EspecialidadRequest especialidadRequest, [FromQuery] int id = 0)
     {
         try
         {
