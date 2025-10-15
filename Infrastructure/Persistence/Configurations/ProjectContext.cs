@@ -14,17 +14,9 @@ public class ProjectContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // Configuración de la cadena de conexión a la base de datos
-        var conn = "";
-        if (OracleProvider)
-        {
-            conn = Environment.GetEnvironmentVariable("STRING_CONN_DAPPS_ORACLE") ?? throw new InvalidOperationException("La cadena de conexión no está definida en la variable de entorno 'STRING_CONN_DAPPS_ORACLE'.");
-            optionsBuilder.UseOracle(conn);
-        }
-        else
-        {
-             conn = Environment.GetEnvironmentVariable("STRING_CONN_DAPPS_MYSQL") ?? throw new InvalidOperationException("La cadena de conexión no está definida en la variable de entorno 'STRING_CONN_DAPPS_MYSQL'.");
-            optionsBuilder.UseMySql(conn, ServerVersion.AutoDetect(conn));
-        }
+        var conn = Environment.GetEnvironmentVariable("OCI_WALLET") ?? throw new InvalidOperationException("La cadena de conexión no está definida en la variable de entorno 'OCI_WALLET'.");
+        optionsBuilder.UseOracle(conn, b => b.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+
         base.OnConfiguring(optionsBuilder);
     }
 

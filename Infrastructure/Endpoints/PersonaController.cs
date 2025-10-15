@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PersonasController : ControllerBase
     {
         private readonly IPersonaService _personaService;
