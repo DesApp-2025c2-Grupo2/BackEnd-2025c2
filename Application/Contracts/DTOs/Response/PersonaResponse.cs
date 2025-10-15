@@ -9,7 +9,6 @@ public class PersonaResponse
     public int numeroIntegrante { get; set; }
     public string nombre { get; set; }
     public string apellido { get; set; }
-    public DateTime fechaNacimiento { get; set; }
     public Parentesco parentesco { get; set; }
     public DateTime alta { get; set; }
     public DateTime? baja { get; set; }

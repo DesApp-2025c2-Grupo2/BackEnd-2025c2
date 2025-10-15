@@ -98,6 +98,7 @@ namespace Application.Services
             var lista = await _afiliadoRepo.GetAllAsync();
             return lista.Select(a => new AfiliadoResponse
             {
+                Id = a.Id,
                 NumeroAfiliado = a.NumeroAfiliado,
                 TitularID = a.TitularID,
                 PlanMedicoId = a.PlanMedicoId,
@@ -110,7 +111,7 @@ namespace Application.Services
                     numeroIntegrante = p.NumeroIntegrante,
                     nombre = p.Nombre,
                     apellido = p.Apellido,
-                    fechaNacimiento = p.FechaNacimiento,
+                    FechaNacimiento = p.FechaNacimiento,
                     parentesco = p.Parentesco,
                     alta = p.Alta,
                     baja = p.Baja,
@@ -130,6 +131,7 @@ namespace Application.Services
 
             return new AfiliadoResponse
             {
+                Id = entidad.Id,
                 NumeroAfiliado = entidad.NumeroAfiliado,
                 TitularID = entidad.TitularID,
                 PlanMedicoId = entidad.PlanMedicoId,
@@ -142,7 +144,7 @@ namespace Application.Services
                     numeroIntegrante = p.NumeroIntegrante,
                     nombre = p.Nombre,
                     apellido = p.Apellido,
-                    fechaNacimiento = p.FechaNacimiento,
+                    FechaNacimiento = p.FechaNacimiento,
                     parentesco = p.Parentesco,
                     alta = p.Alta,
                     baja = p.Baja,
