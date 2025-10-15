@@ -5,8 +5,12 @@ namespace Application.Contracts.DTOs.Response;
 public class AfiliadosResponse : List<AfiliadoResponse>;
 public class AfiliadoResponse
 {
-    public int numeroAfiliado { get; set; }
-    public PersonaResponse titular { get; set; }
-    public List<PersonaResponse> integrantes { get; set; }
-    public PlanMedicoDTO planMedico { get; set; }
+    public int NumeroAfiliado { get; set; }
+    public int TitularID { get; set; }
+    public int PlanMedicoId { get; set; }
+    public string? PlanMedicoNombre { get; set; }
+    public DateTime Alta { get; set; }
+    public DateTime? Baja { get; set; }
+
+    public List<PersonaResponse>? Integrantes { get; set; }
 }

@@ -1,8 +1,10 @@
-﻿namespace Application.Contracts.DTOs.Internal;
+﻿using Domain.Enums;
+
+namespace Application.Contracts.DTOs.Internal;
 
 public class DocumentacionDTO
 {
-    public int id { get; set; }
-    public int tipoDocumento { get; set; }
-    public string numero { get; set; }
+    public int Id { get; set; }
+    public TipoDocumento TipoDocumento { get; set; }
+    public string Numero { get; set; }
 }
