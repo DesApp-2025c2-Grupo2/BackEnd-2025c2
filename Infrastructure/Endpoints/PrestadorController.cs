@@ -77,7 +77,7 @@ public class PrestadorController : ControllerBase
                 {
                     Id = 1,
                     NombreCompleto = "Dr. Juan Pérez",
-                    Rol = 1,
+                    Rol = 0,
                     CentroMedico = "Clínica Central",
                     Especialidades = new List<int> { 1, 2 },
                     Documentacion = new DocumentacionDTO { id = 1, tipoDocumento = 6, numero = "30-12345678-9" },
@@ -89,7 +89,7 @@ public class PrestadorController : ControllerBase
                 {
                     Id = 2,
                     NombreCompleto = "Dra. María Gómez",
-                    Rol = 2,
+                    Rol = 0,
                     CentroMedico = "Hospital Norte",
                     Especialidades = new List<int> { 3 },
                     Documentacion = new DocumentacionDTO { id = 2, tipoDocumento = 6, numero = "30-87654321-0" },
