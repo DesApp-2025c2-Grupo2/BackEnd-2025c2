@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 
 namespace Infrastructure.Persistence.Seeds;
 
@@ -104,7 +105,7 @@ public static class TableSeeds
             Alta = DateTime.Parse("2025-09-21").Date
         }
     };
-    
+
     public static List<Especialidad> Especialidades() => new List<Especialidad>()
     {
         new Especialidad()
@@ -168,7 +169,7 @@ public static class TableSeeds
             Alta = DateTime.Parse("2025-09-21").Date
         }
     };
-    
+
     public static List<PlanMedico> PlanesMedicos() => new List<PlanMedico>()
     {
         new PlanMedico()
@@ -244,4 +245,214 @@ public static class TableSeeds
             Alta = DateTime.Parse("2025-09-21").Date
         }
     };
+
+    public static List<Afiliado> Afiliados() => new List<Afiliado>()
+    {
+            new Afiliado()
+            {
+                Id = 1,
+                NumeroAfiliado = 100001,
+                TitularID = 1,
+                PlanMedicoId = 1,
+                Alta = DateTime.Parse("2024-01-15").Date,
+                Baja = null,
+                Integrantes = new List<Persona>()
+            },
+            new Afiliado()
+            {
+                Id = 2,
+                NumeroAfiliado = 100002,
+                TitularID = 3,
+                PlanMedicoId = 2,
+                Alta = DateTime.Parse("2024-02-20").Date,
+                Baja = null,
+                Integrantes = new List<Persona>()
+            },
+            new Afiliado()
+            {
+                Id = 3,
+                NumeroAfiliado = 100003,
+                TitularID = 5,
+                PlanMedicoId = 3,
+                Alta = DateTime.Parse("2024-03-10").Date,
+                Baja = DateTime.Parse("2024-06-01").Date,
+                Integrantes = new List<Persona>()
+            }
+        };
+
+    public static List<Persona> Personas() => new List<Persona>()
+        {
+            // Familia González - Afiliado 100001
+            new Persona()
+            {
+                Id = 1,
+                NumeroIntegrante = 1,
+                Nombre = "Carlos",
+                Apellido = "González",
+                FechaNacimiento = DateTime.Parse("1980-05-15").Date,
+                Parentesco = Parentesco.Titular,
+                AfiliadoId = 1,
+                Alta = DateTime.Parse("2024-01-15").Date,
+                Baja = null,
+                Telefonos = new List<Telefono>
+                {
+                    new Telefono { Id = 1, Numero = "+5491154879632", PersonaId = 1 },
+                    new Telefono { Id = 2, Numero = "+5491154879633", PersonaId = 1 }
+                },
+                Emails = new List<Email>
+                {
+                    new Email { Id = 1, Correo = "carlos.gonzalez@email.com", PersonaId = 1 }
+                },
+                Documentacion = new Documentacion
+                {
+                    Id = 1,
+                    TipoDocumento = TipoDocumento.DocumentoNacionalDeIdentidad,
+                    Numero = "30123456",
+                    PersonaId = 1
+                },
+                Direcciones = new List<Direccion>
+                {
+                    new Direccion
+                    {
+                        Id = 1,
+                        Calle = "Av. Corrientes",
+                        Altura = "1234",
+                        Piso = "5",
+                        Departamento = "A",
+                        ProvinciaCiudad = "Buenos Aires",
+                        PersonaId = 1
+                    }
+                }
+            },
+            new Persona()
+            {
+                Id = 2,
+                NumeroIntegrante = 2,
+                Nombre = "María",
+                Apellido = "López",
+                FechaNacimiento = DateTime.Parse("1982-08-22").Date,
+                Parentesco = Parentesco.Conyuge,
+                AfiliadoId = 1,
+                Alta = DateTime.Parse("2024-01-15").Date,
+                Baja = null,
+                Telefonos = new List<Telefono>
+                {
+                    new Telefono { Id = 3, Numero = "+5491163258741", PersonaId = 2 }
+                },
+                Emails = new List<Email>
+                {
+                    new Email { Id = 2, Correo = "maria.lopez@email.com", PersonaId = 2 }
+                },
+                Documentacion = new Documentacion
+                {
+                    Id = 2,
+                    TipoDocumento = TipoDocumento.DocumentoNacionalDeIdentidad,
+                    Numero = "28987654",
+                    PersonaId = 2
+                }
+            },
+
+            // Familia Rodríguez - Afiliado 100002
+            new Persona()
+            {
+                Id = 3,
+                NumeroIntegrante = 1,
+                Nombre = "Ana",
+                Apellido = "Rodríguez",
+                FechaNacimiento = DateTime.Parse("1975-12-03").Date,
+                Parentesco = Parentesco.Titular,
+                AfiliadoId = 2,
+                Alta = DateTime.Parse("2024-02-20").Date,
+                Baja = null,
+                Telefonos = new List<Telefono>
+                {
+                    new Telefono { Id = 4, Numero = "+5491145698723", PersonaId = 3 }
+                },
+                Emails = new List<Email>
+                {
+                    new Email { Id = 3, Correo = "ana.rodriguez@email.com", PersonaId = 3 }
+                },
+                Documentacion = new Documentacion
+                {
+                    Id = 3,
+                    TipoDocumento = TipoDocumento.DocumentoNacionalDeIdentidad,
+                    Numero = "25456321",
+                    PersonaId = 3
+                },
+                Direcciones = new List<Direccion>
+                {
+                    new Direccion
+                    {
+                        Id = 2,
+                        Calle = "Calle Florida",
+                        Altura = "567",
+                        Piso = "",
+                        Departamento = "",
+                        ProvinciaCiudad = "Córdoba",
+                        PersonaId = 3
+                    }
+                }
+            },
+            new Persona()
+            {
+                Id = 4,
+                NumeroIntegrante = 2,
+                Nombre = "Juan",
+                Apellido = "Rodríguez",
+                FechaNacimiento = DateTime.Parse("2010-03-18").Date,
+                Parentesco = Parentesco.Hijo_a,
+                AfiliadoId = 2,
+                Alta = DateTime.Parse("2024-02-20").Date,
+                Baja = null,
+                Documentacion = new Documentacion
+                {
+                    Id = 4,
+                    TipoDocumento = TipoDocumento.DocumentoNacionalDeIdentidad,
+                    Numero = "50123456",
+                    PersonaId = 4
+                }
+            },
+
+            // Afiliado individual - Afiliado 100003 (dado de baja)
+            new Persona()
+            {
+                Id = 5,
+                NumeroIntegrante = 1,
+                Nombre = "Luis",
+                Apellido = "Martínez",
+                FechaNacimiento = DateTime.Parse("1990-07-30").Date,
+                Parentesco = Parentesco.Titular,
+                AfiliadoId = 3,
+                Alta = DateTime.Parse("2024-03-10").Date,
+                Baja = DateTime.Parse("2024-06-01").Date,
+                Telefonos = new List<Telefono>
+                {
+                    new Telefono { Id = 5, Numero = "+5491156239874", PersonaId = 5 }
+                },
+                Emails = new List<Email>
+                {
+                    new Email { Id = 4, Correo = "luis.martinez@email.com", PersonaId = 5 }
+                },
+                Documentacion = new Documentacion
+                {
+                    Id = 5,
+                    TipoDocumento = TipoDocumento.DocumentoNacionalDeIdentidad,
+                    Numero = "37123456",
+                    PersonaId = 5
+                },
+                Direcciones = new List<Direccion>
+                {
+                    new Direccion
+                    {
+                        Id = 3,
+                        Calle = "Av. Santa Fe",
+                        Altura = "2456",
+                        Piso = "2",
+                        Departamento = "B",
+                        ProvinciaCiudad = "Mendoza",
+                        PersonaId = 5
+                    }
+                }
+            }
+        };
 }

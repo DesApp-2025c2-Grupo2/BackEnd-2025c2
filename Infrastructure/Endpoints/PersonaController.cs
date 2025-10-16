@@ -8,35 +8,28 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AfiliadosController : ControllerBase
+    public class PersonasController : ControllerBase
     {
-        private readonly IAfiliadoService _afiliadoService;
+        private readonly IPersonaService _personaService;
 
-        public AfiliadosController(IAfiliadoService afiliadoService)
+        public PersonasController(IPersonaService personaService)
         {
-            _afiliadoService = afiliadoService;
+            _personaService = personaService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<AfiliadosResponse>> GetAll()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PersonaResponse>> GetById([Required] int id)
         {
-            var afiliados = await _afiliadoService.GetAllAsync();
-            return Ok(afiliados);
-        }
-
-        [HttpGet("{numeroAfiliado}")]
-        public async Task<ActionResult<AfiliadoResponse>> GetByNumero([Required] int numeroAfiliado)
-        {
-            var afiliado = await _afiliadoService.GetByNumeroAsync(numeroAfiliado);
-            if (afiliado == null)
+            var persona = await _personaService.GetByIdAsync(id);
+            if (persona == null)
             {
                 return NotFound();
             }
-            return Ok(afiliado);
+            return Ok(persona);
         }
 
         [HttpPost]
-        public async Task<ActionResult<AfiliadoResponse>> Create([FromBody] AfiliadoRequest request)
+        public async Task<ActionResult<PersonaResponse>> Create([FromBody] PersonaRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -45,8 +38,8 @@ namespace API.Controllers
 
             try
             {
-                var afiliado = await _afiliadoService.CreateAsync(request);
-                return CreatedAtAction(nameof(GetByNumero), new { numeroAfiliado = afiliado.NumeroAfiliado }, afiliado);
+                var persona = await _personaService.CrearPersonaAsync(request);
+                return CreatedAtAction(nameof(GetById), new { id = persona.Id }, persona);
             }
             catch (Exception ex)
             {
@@ -59,9 +52,8 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([Required] int id, [FromBody] AfiliadoRequest request)
+        public async Task<ActionResult<PersonaResponse>> Update([Required] int id, [FromBody] PersonaRequest request)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -69,8 +61,8 @@ namespace API.Controllers
 
             try
             {
-                await _afiliadoService.UpdateAsync(id, request);
-                return NoContent();
+                var persona = await _personaService.ActualizarPersonaAsync(id, request);
+                return Ok(persona);
             }
             catch (Exception ex)
             {
