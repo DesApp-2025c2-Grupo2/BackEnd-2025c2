@@ -61,6 +61,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([Required] int id, [FromBody] AfiliadoRequest request)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

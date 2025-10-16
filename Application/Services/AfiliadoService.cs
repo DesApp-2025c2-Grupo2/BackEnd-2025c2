@@ -197,9 +197,44 @@ namespace Application.Services
             await _afiliadoRepo.UpdateAsync(entidad);
             await _afiliadoRepo.SaveChangesAsync();
 
-            // Nota: actualizar/crear integrantes si se requiere
-        }
+            if (request.Integrantes != null && request.Integrantes.Any())
+            {
+                foreach (var integranteReq in request.Integrantes)
+                {
+                    // Si el integrante no tiene Id (nuevo)
+                    if (integranteReq.Id == 0)
+                    {
+                        var persona = new Persona
+                        {
+                            Nombre = integranteReq.Nombre,
+                            Apellido = integranteReq.Apellido,
+                            FechaNacimiento = integranteReq.FechaNacimiento,
+                            Parentesco = integranteReq.Parentesco,
+                            NumeroIntegrante = integranteReq.NumeroIntegrante,
+                            Alta = integranteReq.Alta,
+                            Baja = integranteReq.Baja,
+                            Documentacion = integranteReq.Documentacion != null ? new Documentacion
+                            {
+                                TipoDocumento = integranteReq.Documentacion.TipoDocumento,
+                                Numero = integranteReq.Documentacion.Numero
+                            } : null,
+                            Telefonos = integranteReq.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new(),
+                            Emails = integranteReq.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new(),
+                            Direcciones = integranteReq.Direcciones?.Select(d => new Direccion
+                            {
+                                Calle = d.Calle,
+                                Altura = d.Altura,
+                                Piso = d.Piso,
+                                Departamento = d.Departamento,
+                                ProvinciaCiudad = d.ProvinciaCiudad
+                            }).ToList() ?? new()
+                        };
 
+                        await _personaRepo.AddAsync(persona);
+                    }
+                }
+            }
+        }
         // --- Auxiliar: mapear Persona -> PersonaResponse ---
         private PersonaResponse MapPersonaToResponse(Persona p)
         {
