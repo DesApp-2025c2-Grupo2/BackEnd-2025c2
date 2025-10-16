@@ -39,11 +39,15 @@ namespace API.Controllers
             try
             {
                 var persona = await _personaService.CrearPersonaAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = persona.id }, persona);
+                return CreatedAtAction(nameof(GetById), new { id = persona.Id }, persona);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    detalle = ex.InnerException?.Message
+                });
             }
         }
 
@@ -62,7 +66,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    detalle = ex.InnerException?.Message
+                });
             }
         }
     }

@@ -14,11 +14,12 @@ namespace Application.Services
     public class PersonaService : IPersonaService
     {
         private readonly IPersonaRepository _personaRepo;
+        private readonly ISituacionTerapeuticaRepository _situacionRepo;
 
-
-        public PersonaService(IPersonaRepository personaRepo)
+        public PersonaService(IPersonaRepository personaRepo, ISituacionTerapeuticaRepository situacionRepo)
         {
             _personaRepo = personaRepo;
+            _situacionRepo = situacionRepo;
         }
 
         public async Task<PersonaResponse> CrearPersonaAsync(PersonaRequest request)
@@ -32,137 +33,150 @@ namespace Application.Services
                 Parentesco = request.Parentesco,
                 AfiliadoId = request.AfiliadoId,
                 Alta = request.Alta,
-                Baja = request.Baja
+                Baja = request.Baja,
+                Telefonos = request.Telefonos?.Select(t => new Telefono
+                {
+                    Numero = t.Numero,
+                }).ToList() ?? new List<Telefono>(),
+                Emails = request.Emails?.Select(e => new Email
+                {
+                    Correo = e.Correo,
+                }).ToList() ?? new List<Email>(),
+                Direcciones = request.Direcciones?.Select(d => new Direccion
+                {
+                    Calle = d.Calle,
+                    Altura = d.Altura,
+                    Piso = d.Piso,
+                    Departamento = d.Departamento,
+                    ProvinciaCiudad = d.ProvinciaCiudad
+                }).ToList() ?? new List<Direccion>(),
+                Documentacion = new Documentacion
+                {
+                    TipoDocumento = request.Documentacion.TipoDocumento,
+                    Numero = request.Documentacion.Numero,
+                }
             };
 
-
-            await _personaRepo.AddAsync(persona);
-            await _personaRepo.SaveChangesAsync();
-
-
-            return new PersonaResponse
+            // Asociar las situaciones terapéuticas
+            if (request.SituacionesTerapeuticasIds != null && request.SituacionesTerapeuticasIds.Any())
             {
-                id = persona.Id,
-                numeroIntegrante = persona.NumeroIntegrante,
-                nombre = persona.Nombre,
-                apellido = persona.Apellido,
-                FechaNacimiento = persona.FechaNacimiento,
-                parentesco = persona.Parentesco,
-                alta = persona.Alta,
-                baja = persona.Baja,
-                telefonos = new List<Application.Contracts.DTOs.Internal.TelefonoDTO>(),
-                emails = new List<Application.Contracts.DTOs.Internal.EmailDTO>(),
-                documentacion = null,
-                direcciones = new List<Application.Contracts.DTOs.Internal.DireccionDTO>()
-            };
+                var situaciones = await _situacionRepo.GetByIdsAsync(request.SituacionesTerapeuticasIds);
+                persona.SituacionesTerapeuticas = situaciones.ToList();
+            }
+
+            try
+            {
+                await _personaRepo.AddAsync(persona);
+                await _personaRepo.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al guardar la persona", ex);
+            }
+
+            return MapToResponse(persona);
         }
 
         public async Task<PersonaResponse> GetByIdAsync(int id)
         {
-            // Obtenemos la persona desde el repositorio
             var persona = await _personaRepo.GetByIdAsync(id);
-
-            // Si no existe, devolvemos null
             if (persona == null) return null;
 
-            // Convertimos la entidad Persona a PersonaResponse
-            var response = new PersonaResponse
-            {
-                id = persona.Id,
-                numeroIntegrante = persona.NumeroIntegrante,
-                nombre = persona.Nombre,
-                apellido = persona.Apellido,
-                FechaNacimiento = persona.FechaNacimiento,
-                parentesco = persona.Parentesco,
-                alta = persona.Alta,
-                baja = persona.Baja,
-                // Aquí opcionalmente mapear relaciones si existen
-                telefonos = persona.Telefonos?.Select(t => new TelefonoDTO
-                {
-                    id = t.Id,
-                    numero = t.Numero
-                }).ToList() ?? new List<TelefonoDTO>(),
-                emails = persona.Emails?.Select(e => new EmailDTO
-                {
-                    id = e.Id,
-                    correo = e.Correo
-                }).ToList() ?? new List<EmailDTO>(),
-                documentacion = persona.Documentacion != null ? new DocumentacionDTO
-                {
-                    Id = persona.Documentacion.Id,
-                    TipoDocumento = persona.Documentacion.TipoDocumento,
-                    Numero = persona.Documentacion.Numero
-                } : null,
-                direcciones = persona.Direcciones?.Select(d => new DireccionDTO
-                {
-                    id = d.Id,
-                    calle = d.Calle,
-                    altura = d.Altura,
-                    piso = d.Piso,
-                    departamento = d.Departamento,
-                    provinciaCiudad = d.ProvinciaCiudad
-                }).ToList() ?? new List<DireccionDTO>(),
-                SituacionesTerapeuticasIds = persona.SituacionesTerapeuticas?.Select(s => s.Id).ToList()
-            };
-
-            return response;
+            return MapToResponse(persona);
         }
-
 
         public async Task<PersonaResponse> ActualizarPersonaAsync(int id, PersonaRequest request)
         {
             var persona = await _personaRepo.GetByIdAsync(id);
             if (persona == null) throw new Exception("Persona no encontrada");
 
+            persona.NumeroIntegrante = request.NumeroIntegrante;
             persona.Nombre = request.Nombre;
             persona.Apellido = request.Apellido;
             persona.FechaNacimiento = request.FechaNacimiento;
             persona.Parentesco = request.Parentesco;
+            persona.AfiliadoId = request.AfiliadoId;
+            persona.Alta = request.Alta;
             persona.Baja = request.Baja;
+            persona.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new List<Telefono>();
+            persona.Emails = request.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new List<Email>();
+            persona.Direcciones = request.Direcciones?.Select(d => new Direccion
+            {
+                Calle = d.Calle,
+                Altura = d.Altura,
+                Piso = d.Piso,
+                Departamento = d.Departamento,
+                ProvinciaCiudad = d.ProvinciaCiudad
+            }).ToList() ?? new List<Direccion>();
+            persona.Documentacion = new Documentacion
+            {
+                TipoDocumento = request.Documentacion.TipoDocumento,
+                Numero = request.Documentacion.Numero,
+            };
+
+            // Asociar las situaciones terapéuticas correctamente
+            if (request.SituacionesTerapeuticasIds != null && request.SituacionesTerapeuticasIds.Any())
+            {
+                var situaciones = await _situacionRepo.GetByIdsAsync(request.SituacionesTerapeuticasIds);
+                persona.SituacionesTerapeuticas = situaciones.ToList();
+            }
+            else
+            {
+                persona.SituacionesTerapeuticas = new List<SituacionTerapeutica>();
+            }
 
             await _personaRepo.UpdateAsync(persona);
             await _personaRepo.SaveChangesAsync();
 
-            // Convertimos la entidad actualizada a PersonaResponse
+            return MapToResponse(persona);
+        }
+
+        // Método privado para mapear Persona -> PersonaResponse
+        private PersonaResponse MapToResponse(Persona persona)
+        {
             return new PersonaResponse
             {
-                id = persona.Id,
-                numeroIntegrante = persona.NumeroIntegrante,
-                nombre = persona.Nombre,
-                apellido = persona.Apellido,
+                Id = persona.Id,
+                NumeroIntegrante = persona.NumeroIntegrante,
+                Nombre = persona.Nombre,
+                Apellido = persona.Apellido,
                 FechaNacimiento = persona.FechaNacimiento,
-                parentesco = persona.Parentesco,
-                alta = persona.Alta,
-                baja = persona.Baja,
-                // mapear relaciones opcionales si existen
-                telefonos = persona.Telefonos?.Select(t => new TelefonoDTO
+                Parentesco = persona.Parentesco,
+                Alta = persona.Alta,
+                Baja = persona.Baja,
+                Telefonos = persona.Telefonos?.Select(t => new TelefonoDTO
                 {
-                    id = t.Id,
-                    numero = t.Numero
-                }).ToList() ?? new List<TelefonoDTO>(),
-                emails = persona.Emails?.Select(e => new EmailDTO
+                    Id = t.Id,
+                    Numero = t.Numero,
+                }).ToList(),
+                Emails = persona.Emails?.Select(e => new EmailDTO
                 {
-                    id = e.Id,
-                    correo = e.Correo
-                }).ToList() ?? new List<EmailDTO>(),
-                documentacion = persona.Documentacion != null ? new DocumentacionDTO
+                    Id = e.Id,
+                    Correo = e.Correo,
+                }).ToList(),
+                Direcciones = persona.Direcciones?.Select(d => new DireccionDTO
+                {
+                    Id = d.Id,
+                    Calle = d.Calle,
+                    Altura = d.Altura,
+                    Piso = d.Piso,
+                    Departamento = d.Departamento,
+                    ProvinciaCiudad = d.ProvinciaCiudad
+                }).ToList(),
+                Documentacion = persona.Documentacion == null ? null : new DocumentacionDTO
                 {
                     Id = persona.Documentacion.Id,
                     TipoDocumento = persona.Documentacion.TipoDocumento,
                     Numero = persona.Documentacion.Numero
-                } : null,
-                direcciones = persona.Direcciones?.Select(d => new DireccionDTO
+                },
+                SituacionesTerapeuticas = persona.SituacionesTerapeuticas?.Select(s => new SituacionTerapeuticaResponse
                 {
-                    id = d.Id,
-                    calle = d.Calle,
-                    altura = d.Altura,
-                    piso = d.Piso,
-                    departamento = d.Departamento,
-                    provinciaCiudad = d.ProvinciaCiudad
-                }).ToList() ?? new List<DireccionDTO>(),
-                SituacionesTerapeuticasIds = persona.SituacionesTerapeuticas?.Select(s => s.Id).ToList()
+                    id = s.Id,
+                    nombre = s.Nombre,
+                    descripcion = s.Descripcion,
+                    activa = s.Baja == null || s.Baja > DateTime.Now.Date
+                }).ToList()
             };
         }
-
     }
 }

@@ -2,6 +2,6 @@
 
 public class TelefonoDTO
 {
-    public int id { get; set; }
-    public string numero { get; set; }
+    public int Id { get; set; }
+    public string Numero { get; set; }
 }

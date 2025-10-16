@@ -50,7 +50,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    detalle = ex.InnerException?.Message
+                });
             }
         }
 
@@ -69,7 +73,11 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    detalle = ex.InnerException?.Message
+                });
             }
         }
     }

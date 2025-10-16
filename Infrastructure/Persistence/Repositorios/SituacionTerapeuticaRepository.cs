@@ -42,6 +42,21 @@ public class SituacionTerapeuticaRepository : ISituacionTerapeuticaRepository
         }
     }
 
+    public async Task<List<SituacionTerapeutica>> GetByIdsAsync(List<int> ids)
+    {
+        try
+        {
+            List<SituacionTerapeutica> list = await dbContext.SituacionesTerapeuticas
+                .Where(s => ids.Contains(s.Id))
+                .ToListAsync();
+            return list;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error al obtener las Situaciones Terapeuticas por IDs", ex);
+        }
+    }
+
     public async Task<bool> ToggleStatusAsync(int id)
     {
         try
