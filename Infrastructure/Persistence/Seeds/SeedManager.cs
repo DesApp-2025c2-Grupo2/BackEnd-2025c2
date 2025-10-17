@@ -11,6 +11,9 @@ public static class SeedManager
         await SeedSituacionTerapeutica(context);
         await SeedEspecialidades(context);
         await SeedPlanesMedicos(context);
+
+        await SeedAfiliados(context);
+        await SeedPersonas(context);
         logger.LogInformation("Seeds inicializados correctamente.");
     }
     
@@ -44,6 +47,28 @@ public static class SeedManager
         {
             var planes = TableSeeds.PlanesMedicos();
             await context.PlanesMedicos.AddRangeAsync(planes);
+            await context.SaveChangesAsync();
+        }
+    }
+
+    private static async Task SeedAfiliados(ProjectContext context)
+    {
+        int cantidad = await context.Afiliados.CountAsync();
+        if (cantidad == 0)
+        {
+            var afiliados = TableSeeds.Afiliados();
+            await context.Afiliados.AddRangeAsync(afiliados);
+            await context.SaveChangesAsync();
+        }
+    }
+
+    private static async Task SeedPersonas(ProjectContext context)
+    {
+        int cantidad = await context.Personas.CountAsync();
+        if (cantidad == 0)
+        {
+            var personas = TableSeeds.Personas();
+            await context.Personas.AddRangeAsync(personas);
             await context.SaveChangesAsync();
         }
     }

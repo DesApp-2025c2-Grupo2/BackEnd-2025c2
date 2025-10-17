@@ -14,6 +14,8 @@ public static class DependencyContainer
         services.AddScoped(typeof(ISituacionTerapeuticaService), typeof(SituacionTerapeuticaService));
         services.AddScoped(typeof(IPlanMedicoService), typeof(PlanMedicoService));
         services.AddScoped(typeof(IEspecialidadService), typeof(EspecialidadService));
+        services.AddScoped(typeof(IPersonaService), typeof(PersonaService));
+        services.AddScoped(typeof(IAfiliadoService), typeof(AfiliadoService));
         return services;
     }
     public static IServiceCollection AddRepositories(this IServiceCollection services)
@@ -23,6 +25,8 @@ public static class DependencyContainer
         services.AddScoped(typeof(ISituacionTerapeuticaRepository), typeof(SituacionTerapeuticaRepository));
         services.AddScoped(typeof(IPlanMedicoRepository), typeof(PlanMedicoRepository));
         services.AddScoped(typeof(IEspecialidadRepository), typeof(EspecialidadRepository));
+        services.AddScoped(typeof(IAfiliadoRepository), typeof(AfiliadoRepository));
+        services.AddScoped(typeof(IPersonaRepository), typeof(PersonaRepository));
         return services;
     }
 

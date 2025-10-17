@@ -1,4 +1,6 @@
-﻿namespace Application.Contracts.DTOs.Internal;
+﻿using Domain.Enums;
+
+namespace Application.Contracts.DTOs.Internal;
 
 public class DocumentacionDTO
 {
