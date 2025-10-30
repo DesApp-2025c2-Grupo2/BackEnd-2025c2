@@ -22,5 +22,4 @@ public class Afiliado
 
     // Navegacion bidireccional
     public List<Persona> Integrantes { get; set; } = new List<Persona>();
-
 }

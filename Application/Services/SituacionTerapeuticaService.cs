@@ -34,6 +34,23 @@ public class SituacionTerapeuticaService : ISituacionTerapeuticaService
         return response;
     }
 
+    public async Task<SituacionesTerapeuticasResponse> GetByIdsAsync(List<int> ids)
+    {
+        List<SituacionTerapeutica> situaciones = await repository.GetByIdsAsync(ids);
+        SituacionesTerapeuticasResponse response = new SituacionesTerapeuticasResponse();
+        situaciones.ForEach(situacion =>
+        {
+            response.Add(new SituacionTerapeuticaResponse
+            {
+                id = situacion.Id,
+                nombre = situacion.Nombre,
+                descripcion = situacion.Descripcion,
+                activa = situacion.Baja == null || situacion.Baja > DateTime.Now.Date
+            });
+        });
+        return response;
+    }
+
     public async Task<SituacionesTerapeuticasResponse> GetAllAsync()
     {
         List<SituacionTerapeutica> situaciones = await repository.GetAllAsync();

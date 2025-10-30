@@ -2,6 +2,6 @@
 
 public class EmailDTO
 {
-    public int id { get; set; }
-    public string correo { get; set; }
+    public int Id { get; set; }
+    public string Correo { get; set; }
 }

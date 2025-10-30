@@ -8,5 +8,6 @@ public interface ISituacionTerapeuticaService
     Task<SituacionesTerapeuticasResponse> GetAllAsync();
     Task<bool> ToggleStatusAsync(int id);
     Task<SituacionTerapeuticaResponse> UpdateAsync(int id, SituacionTerapeuticaRequest request);
+    Task<SituacionesTerapeuticasResponse> GetByIdsAsync(List<int> ids);
     Task<SituacionTerapeuticaResponse> AddAsync(SituacionTerapeuticaRequest request);
 }

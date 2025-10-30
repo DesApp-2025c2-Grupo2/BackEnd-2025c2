@@ -30,7 +30,7 @@ public class Persona
     public DateTime? Baja { get; set; }
 
     // Navegacion bidireccional
-    public List<Documentacion> Documentos { get; set; } = new List<Documentacion>();
+    public Documentacion Documentacion { get; set; } = new Documentacion();
     public List<Telefono> Telefonos { get; set; } = new List<Telefono>();
     public List<Email> Emails { get; set; } = new List<Email>();
     public List<Direccion> Direcciones { get; set; } = new List<Direccion>();
