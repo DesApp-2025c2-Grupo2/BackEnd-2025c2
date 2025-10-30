@@ -8,7 +8,7 @@ namespace Application.Contracts.Interfaces
         Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request);
         Task<AfiliadoResponse> GetByNumeroAsync(int numeroAfiliado);
         Task<IEnumerable<AfiliadoResponse>> GetAllAsync();
-        Task UpdateAsync(int id, AfiliadoRequest request);
+        Task<AfiliadoResponse> UpdateAsync(int id, AfiliadoRequest request);
         Task DeleteAsync(int id);
     }
 }

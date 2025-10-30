@@ -32,9 +32,9 @@ public class PrestadorController : ControllerBase
                     CentroMedico = prestadorReq.CentroMedico,
                     Especialidades = new List<int> { 1, 2 }, // Ejemplo estático
                     Documentacion = new DocumentacionDTO { id = 1, tipoDocumento = 6, numero = prestadorReq.Documentacion },
-                    Telefonos = prestadorReq.Telefonos.Select((t, index) => new TelefonoDTO { id = index + 1, numero = t }).ToList(),
-                    Emails = prestadorReq.Emails.Select((e, index) => new EmailDTO { id = index + 1, correo = e }).ToList(),
-                    Direcciones = prestadorReq.Direcciones.Select((d, index) => new DireccionDTO { id = index + 1, calle = d }).ToList()
+                    Telefonos = prestadorReq.Telefonos.Select((t, index) => new TelefonoDTO { Id = index + 1, Numero = t }).ToList(),
+                    Emails = prestadorReq.Emails.Select((e, index) => new EmailDTO { Id = index + 1, Correo = e }).ToList(),
+                    Direcciones = prestadorReq.Direcciones.Select((d, index) => new DireccionDTO { Id = index + 1, Calle = d, Altura = string.Empty }).ToList()
 
                 };
                 logger.LogSuccess("Prestador agregado exitosamente.");
@@ -51,9 +51,9 @@ public class PrestadorController : ControllerBase
                     CentroMedico = prestadorReq.CentroMedico,
                     Especialidades = new List<int> { 1, 2 }, // Ejemplo estático
                     Documentacion = new DocumentacionDTO { id = 1, tipoDocumento = 6, numero = prestadorReq.Documentacion },
-                    Telefonos = prestadorReq.Telefonos.Select((t, index) => new TelefonoDTO { id = index + 1, numero = t }).ToList(),
-                    Emails = prestadorReq.Emails.Select((e, index) => new EmailDTO { id = index + 1, correo = e }).ToList(),
-                    Direcciones = prestadorReq.Direcciones.Select((d, index) => new DireccionDTO { id = index + 1, calle = d }).ToList()
+                    Telefonos = prestadorReq.Telefonos.Select((t, index) => new TelefonoDTO { Id = index + 1, Numero = t }).ToList(),
+                    Emails = prestadorReq.Emails.Select((e, index) => new EmailDTO { Id = index + 1, Correo = e }).ToList(),
+                    Direcciones = prestadorReq.Direcciones.Select((d, index) => new DireccionDTO { Id = index + 1, Calle = d, Altura = string.Empty }).ToList()
                 };
                 logger.LogSuccess("Prestador actualizado exitosamente.");
                 return Task.FromResult<IActionResult>(Ok(prestadorUPD));
@@ -81,9 +81,9 @@ public class PrestadorController : ControllerBase
                     CentroMedico = "Clínica Central",
                     Especialidades = new List<int> { 1, 2 },
                     Documentacion = new DocumentacionDTO { id = 1, tipoDocumento = 6, numero = "30-12345678-9" },
-                    Telefonos = new List<TelefonoDTO> { new TelefonoDTO { id = 1, numero = "1234-5678" } },
-                    Emails = new List<EmailDTO> { new EmailDTO { id = 1, correo = "emailfalso@email.com" } },
-                    Direcciones = new List<DireccionDTO> { new DireccionDTO { id = 1, calle = "Calle Falsa 123" } }
+                    Telefonos = new List<TelefonoDTO> { new TelefonoDTO { Id = 1, Numero = "1234-5678" } },
+                    Emails = new List<EmailDTO> { new EmailDTO { Id = 1, Correo = "emailfalso@email.com" } },
+                    Direcciones = new List<DireccionDTO> { new DireccionDTO { Id = 1, Calle = "Calle Falsa 123", Altura = string.Empty } }
                 },
                 new PrestadorResponse
                 {
@@ -93,9 +93,9 @@ public class PrestadorController : ControllerBase
                     CentroMedico = "Hospital Norte",
                     Especialidades = new List<int> { 3 },
                     Documentacion = new DocumentacionDTO { id = 2, tipoDocumento = 6, numero = "30-87654321-0" },
-                    Telefonos = new List<TelefonoDTO> { new TelefonoDTO { id = 2, numero = "8765-4321" } },
-                    Emails = new List<EmailDTO> { new EmailDTO { id = 2, correo = "emailtrucho@hnorte.com" } },
-                    Direcciones = new List<DireccionDTO> { new DireccionDTO { id = 2, calle = "Avenida Siempre Viva 742" } }
+                    Telefonos = new List<TelefonoDTO> { new TelefonoDTO { Id = 2, Numero = "8765-4321" } },
+                    Emails = new List<EmailDTO> { new EmailDTO { Id = 2, Correo = "emailtrucho@hnorte.com" } },
+                    Direcciones = new List<DireccionDTO> { new DireccionDTO { Id = 2, Calle = "Avenida Siempre Viva 742", Altura = string.Empty } }
                 }
             };
             logger.LogSuccess("Prestadores obtenidos exitosamente.");

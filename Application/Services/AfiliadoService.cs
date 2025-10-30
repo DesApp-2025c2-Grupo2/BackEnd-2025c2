@@ -61,8 +61,8 @@ namespace Application.Services
                 Baja = titularRequest.Baja,
                 Documentacion = titularRequest.Documentacion != null ? new Documentacion
                 {
-                    TipoDocumento = titularRequest.Documentacion.TipoDocumento,
-                    Numero = titularRequest.Documentacion.Numero
+                    TipoDocumento = (Domain.Enums.TipoDocumento)titularRequest.Documentacion.tipoDocumento,
+                    Numero = titularRequest.Documentacion.numero
                 } : null,
                 Telefonos = titularRequest.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new(),
                 Emails = titularRequest.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new(),
@@ -106,8 +106,8 @@ namespace Application.Services
                         Baja = pReq.Baja,
                         Documentacion = pReq.Documentacion != null ? new Documentacion
                         {
-                            TipoDocumento = pReq.Documentacion.TipoDocumento,
-                            Numero = pReq.Documentacion.Numero
+                            TipoDocumento = (Domain.Enums.TipoDocumento)pReq.Documentacion.tipoDocumento,
+                            Numero = pReq.Documentacion.numero
                         } : null,
                         Telefonos = pReq.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new(),
                         Emails = pReq.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new(),
@@ -184,7 +184,7 @@ namespace Application.Services
             };
         }
 
-        public async Task UpdateAsync(int id, AfiliadoRequest request)
+        public async Task<AfiliadoResponse> UpdateAsync(int id, AfiliadoRequest request)
         {
             var entidad = await _afiliadoRepo.GetByIdAsync(id);
             if (entidad == null) throw new Exception("Afiliado no encontrado");
@@ -211,12 +211,13 @@ namespace Application.Services
                             FechaNacimiento = integranteReq.FechaNacimiento,
                             Parentesco = integranteReq.Parentesco,
                             NumeroIntegrante = integranteReq.NumeroIntegrante,
+                            AfiliadoId = entidad.Id,
                             Alta = integranteReq.Alta,
                             Baja = integranteReq.Baja,
                             Documentacion = integranteReq.Documentacion != null ? new Documentacion
                             {
-                                TipoDocumento = integranteReq.Documentacion.TipoDocumento,
-                                Numero = integranteReq.Documentacion.Numero
+                                TipoDocumento = (Domain.Enums.TipoDocumento)integranteReq.Documentacion.tipoDocumento,
+                                Numero = integranteReq.Documentacion.numero
                             } : null,
                             Telefonos = integranteReq.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new(),
                             Emails = integranteReq.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new(),
@@ -231,9 +232,23 @@ namespace Application.Services
                         };
 
                         await _personaRepo.AddAsync(persona);
+                        await _personaRepo.SaveChangesAsync();
                     }
                 }
             }
+
+            // devolver el afiliado actualizado (incluyendo integrantes)
+            var actualizado = await _afiliadoRepo.GetByIdAsync(id);
+            return new AfiliadoResponse
+            {
+                Id = actualizado.Id,
+                NumeroAfiliado = actualizado.NumeroAfiliado,
+                TitularID = actualizado.TitularID,
+                PlanMedicoId = actualizado.PlanMedicoId,
+                Alta = actualizado.Alta,
+                Baja = actualizado.Baja,
+                Integrantes = actualizado.Integrantes?.Select(MapPersonaToResponse).ToList() ?? new()
+            };
         }
         // --- Auxiliar: mapear Persona -> PersonaResponse ---
         private PersonaResponse MapPersonaToResponse(Persona p)
@@ -260,9 +275,9 @@ namespace Application.Services
                 }).ToList(),
                 Documentacion = p.Documentacion == null ? null : new Application.Contracts.DTOs.Internal.DocumentacionDTO
                 {
-                    Id = p.Documentacion.Id,
-                    TipoDocumento = p.Documentacion.TipoDocumento,
-                    Numero = p.Documentacion.Numero
+                    id = p.Documentacion.Id,
+                    tipoDocumento = (int)p.Documentacion.TipoDocumento,
+                    numero = p.Documentacion.Numero
                 },
                 Direcciones = p.Direcciones?.Select(d => new Application.Contracts.DTOs.Internal.DireccionDTO
                 {
