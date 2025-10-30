@@ -69,8 +69,8 @@ namespace API.Controllers
 
             try
             {
-                await _afiliadoService.UpdateAsync(id, request);
-                return NoContent();
+                var actualizado = await _afiliadoService.UpdateAsync(id, request);
+                return Ok(actualizado);
             }
             catch (Exception ex)
             {

@@ -52,8 +52,8 @@ namespace Application.Services
                 }).ToList() ?? new List<Direccion>(),
                 Documentacion = new Documentacion
                 {
-                    TipoDocumento = request.Documentacion.TipoDocumento,
-                    Numero = request.Documentacion.Numero,
+                    TipoDocumento = (Domain.Enums.TipoDocumento)request.Documentacion.tipoDocumento,
+                    Numero = request.Documentacion.numero,
                 }
             };
 
@@ -110,8 +110,8 @@ namespace Application.Services
             }).ToList() ?? new List<Direccion>();
             persona.Documentacion = new Documentacion
             {
-                TipoDocumento = request.Documentacion.TipoDocumento,
-                Numero = request.Documentacion.Numero,
+                TipoDocumento = (Domain.Enums.TipoDocumento)request.Documentacion.tipoDocumento,
+                Numero = request.Documentacion.numero,
             };
 
             // Asociar las situaciones terapéuticas correctamente
@@ -165,9 +165,9 @@ namespace Application.Services
                 }).ToList(),
                 Documentacion = persona.Documentacion == null ? null : new DocumentacionDTO
                 {
-                    Id = persona.Documentacion.Id,
-                    TipoDocumento = persona.Documentacion.TipoDocumento,
-                    Numero = persona.Documentacion.Numero
+                    id = persona.Documentacion.Id,
+                    tipoDocumento = (int)persona.Documentacion.TipoDocumento,
+                    numero = persona.Documentacion.Numero
                 },
                 SituacionesTerapeuticas = persona.SituacionesTerapeuticas?.Select(s => new SituacionTerapeuticaResponse
                 {
