@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence.Repositorios
             await _context.Personas.AddAsync(persona);
         }
 
-        public async Task<IEnumerable<Persona>> GetByAfiliadoIdAsync(int afiliadoId)
+        public async Task<List<Persona>> GetByAfiliadoIdAsync(int afiliadoId)
         {
             return await _context.Personas
             .Where(p => p.AfiliadoId == afiliadoId)
@@ -37,11 +37,12 @@ namespace Infrastructure.Persistence.Repositorios
                 .Include(p => p.Emails)
                 .Include(p => p.Documentacion)
                 .Include(p => p.Direcciones)
-                .Include(p => p.SituacionesTerapeuticas)
+                // incluimos las situaciones terapeuticas asociadas siempre y cuando la FechaFin sea null o mayor a la sysdate, obviamente truncamos las fechas para que ignoren el horario
+                .Include(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date))
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<Persona>> GetAllAsync()
+        public async Task<List<Persona>> GetAllAsync()
         {
             return await _context.Personas
                 .Include(p => p.Telefonos)
