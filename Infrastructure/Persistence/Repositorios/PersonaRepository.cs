@@ -37,7 +37,6 @@ namespace Infrastructure.Persistence.Repositorios
                 .Include(p => p.Emails)
                 .Include(p => p.Documentacion)
                 .Include(p => p.Direcciones)
-                // incluimos las situaciones terapeuticas asociadas siempre y cuando la FechaFin sea null o mayor a la sysdate, obviamente truncamos las fechas para que ignoren el horario
                 .Include(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date))
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
