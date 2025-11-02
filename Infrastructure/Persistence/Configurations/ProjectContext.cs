@@ -64,15 +64,7 @@ public class ProjectContext : DbContext
                 index.SetDatabaseName(index.GetDatabaseName()!.ToUpper());
             }
         }
-        // Configuración de la relación muchos a muchos entre Persona y SituacionTerapeutica
-        modelBuilder.Entity<Persona>()
-        .HasMany(p => p.SituacionesTerapeuticas)
-        .WithMany(st => st.Personas)
-        .UsingEntity<Dictionary<string, object>>(
-            "HISTORIAL_TERAPEUTICO", // Nombre de la tabla intermedia
-            j => j.HasOne<SituacionTerapeutica>().WithMany().HasForeignKey("SITUACIONTERAPEUTICAID"),
-            j => j.HasOne<Persona>().WithMany().HasForeignKey("PERSONAID")
-        );
+        
         // Configuración de la relación muchos a muchos entre Prestador y Especialidad
         modelBuilder.Entity<Prestador>()
         .HasMany(p => p.Especialidades)
@@ -100,5 +92,6 @@ public class ProjectContext : DbContext
     public DbSet<Prestador> Prestadores { get; set; }
     public DbSet<SituacionTerapeutica> SituacionesTerapeuticas { get; set; }
     public DbSet<Telefono> Telefonos { get; set; }
+    public DbSet<HistorialTerapeutico> HistorialesTerapeuticos { get; set; }
 
 }
