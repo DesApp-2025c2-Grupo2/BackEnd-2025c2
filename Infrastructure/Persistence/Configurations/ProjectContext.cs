@@ -93,5 +93,6 @@ public class ProjectContext : DbContext
     public DbSet<SituacionTerapeutica> SituacionesTerapeuticas { get; set; }
     public DbSet<Telefono> Telefonos { get; set; }
     public DbSet<HistorialTerapeutico> HistorialesTerapeuticos { get; set; }
+    public DbSet<Reporte> Reportes { get; set; }
 
 }
