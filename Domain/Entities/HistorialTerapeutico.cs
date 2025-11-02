@@ -16,5 +16,6 @@ public class HistorialTerapeutico
     [ForeignKey(nameof(SituacionTerapeutica))]
     public int SituacionTerapeuticaId { get; set; }
     public SituacionTerapeutica SituacionTerapeutica { get; set; }
+    public DateTime? FechaInicio { get; set; }
     public DateTime? FechaFin { get; set; }
 }
