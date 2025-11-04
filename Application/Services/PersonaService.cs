@@ -66,26 +66,6 @@ namespace Application.Services
             {
                 throw new Exception("Error al guardar la persona");
             }
-
-            /*
-            // Asociar las situaciones terapéuticas
-            if (request.SituacionesTerapeuticas != null && request.SituacionesTerapeuticas.Any())
-            {
-                var situaciones = await _situacionRepo.GetByIdsAsync(request.SituacionesTerapeuticasIds);
-                persona.SituacionesTerapeuticas = situaciones.ToList();
-            }
-
-            try
-            {
-                await _personaRepo.AddAsync(persona);
-                await _personaRepo.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al guardar la persona", ex);
-            }
-
-            return MapToResponse(persona);*/
         }
 
         public async Task<PersonaResponse> GetByIdAsync(int id)
@@ -99,7 +79,7 @@ namespace Application.Services
 
         public Task<bool> ToggleStatusAsync(int id, DateTime? fecha)
         {
-            throw new NotImplementedException();
+            return _personaRepo.ToggleStatusAsync(id, fecha ?? DateTime.Now.Date);
         }
 
         public async Task<PersonaResponse> UpdatePersonAsync(int id, PersonaRequest request)
@@ -130,7 +110,7 @@ namespace Application.Services
                 TipoDocumento = (Domain.Enums.TipoDocumento)request.Documentacion.tipoDocumento,
                 Numero = request.Documentacion.numero,
             };
-            await _personaRepo.AddAsync(persona, request.SituacionesTerapeuticas);
+            await _personaRepo.UpdateAsync(persona, request.SituacionesTerapeuticas);
             return EntityDTOMapper.PersonaToDTO(persona);
         }
 

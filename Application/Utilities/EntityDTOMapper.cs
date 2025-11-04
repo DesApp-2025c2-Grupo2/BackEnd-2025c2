@@ -95,19 +95,27 @@ public static class EntityDTOMapper
                 Departamento = d.Departamento,
                 ProvinciaCiudad = d.ProvinciaCiudad
             }).ToList(),
-            Documentacion = new DocumentacionDTO
+            Documentacion = persona.Documentacion != null ? new DocumentacionDTO
             {
                 id = persona.Documentacion.Id,
                 tipoDocumento = (int)persona.Documentacion.TipoDocumento,
                 numero = persona.Documentacion.Numero
-            },
-            SituacionesTerapeuticas = (HistorialTerapeuticoResponse)persona.SituacionesTerapeuticas.Select(s => new RegistroTerapeuticoResponse
+            } : null,
+            SituacionesTerapeuticas = (HistorialTerapeuticoResponse)(persona.SituacionesTerapeuticas?.Select(s => new RegistroTerapeuticoResponse
             {
                 id = s.Id,
                 nombre = s.SituacionTerapeutica.Nombre,
                 fechaFin = s.FechaFin
-            }).ToList()
+            }).ToList()?? new List<RegistroTerapeuticoResponse>())
         };
+        persona.SituacionesTerapeuticas?.ForEach(s =>
+            dto.SituacionesTerapeuticas.Add(new RegistroTerapeuticoResponse
+            {
+                id = s.Id,
+                nombre = s.SituacionTerapeutica.Nombre,
+                fechaFin = s.FechaFin
+            })
+        );
         return dto;
     }
 }

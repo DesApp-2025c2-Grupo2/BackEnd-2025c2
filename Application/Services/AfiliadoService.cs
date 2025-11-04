@@ -20,7 +20,7 @@ public class AfiliadoService : IAfiliadoService
     public async Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request)
     {
         // Obtenemos el titular
-        PersonaRequest? titularReq = request.Integrantes.FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular,null);
+        PersonaRequest? titularReq = request.Integrantes.FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular);
         if (titularReq == null)
             throw new Exception("Debe proporcionarse un titular.");
         // Creamos la entidad Persona para el titular
@@ -59,7 +59,7 @@ public class AfiliadoService : IAfiliadoService
             Integrantes = new List<Persona>() { titularEntity }
         };
         // Guardamos el afiliado (y el titular asociado)
-        await afiliadoRepository.AddAsync(afiliadoEntity, titularReq.SituacionesTerapeuticas);
+        await afiliadoRepository.AddAsync(afiliadoEntity, titularReq.SituacionesTerapeuticas ?? new());
         // Verificamos que se haya guardado correctamente
         if (afiliadoEntity.Id == 0)
             throw new Exception("Error al crear el afiliado.");
