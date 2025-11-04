@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PersonaResponse>> GetById([Required] int id)
+        public async Task<IActionResult> GetById([Required] int id)
         {
             var persona = await _personaService.GetByIdAsync(id);
             if (persona == null)
@@ -28,50 +28,78 @@ namespace API.Controllers
             return Ok(persona);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<PersonaResponse>> Create([FromBody] PersonaRequest request)
+        [HttpPost("addMember/{afiliadoID}")]
+        public async Task<IActionResult> Create([FromBody] PersonaRequest request)
         {
+            ActionResult result;
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                result = BadRequest(ModelState);
             }
-
-            try
+            else
             {
-                var persona = await _personaService.CrearPersonaAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = persona.Id }, persona);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
+                try
                 {
-                    message = ex.Message,
-                    detalle = ex.InnerException?.Message
-                });
+                    var persona = await _personaService.AddPersonAsync(request);
+                    result = CreatedAtAction(nameof(GetById), new { id = persona.Id }, persona);
+                }
+                catch (Exception ex)
+                {
+                    result = BadRequest(new
+                    {
+                        message = ex.Message,
+                        detalle = ex.InnerException?.Message
+                    });
+                }
             }
+            return result;
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<PersonaResponse>> Update([Required] int id, [FromBody] PersonaRequest request)
+        public async Task<IActionResult> Update([Required] int id, [FromBody] PersonaRequest request)
         {
+            ActionResult result;
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                result = BadRequest(ModelState);
             }
+            else
+            {
+                try
+                {
+                    var persona = await _personaService.UpdatePersonAsync(id, request);
+                    result = Ok(persona);
+                }
+                catch (Exception ex)
+                {
+                    result = BadRequest(new
+                    {
+                        message = ex.Message,
+                        detalle = ex.InnerException?.Message
+                    });
+                }
+            }
+            return result;
+        }
 
+        [HttpPatch("toggleStatus/{id}")]
+        public async Task<IActionResult> ToggleStatus([Required] int id, [FromQuery] DateTime? fecha)
+        {
+            ActionResult result;
             try
             {
-                var persona = await _personaService.ActualizarPersonaAsync(id, request);
-                return Ok(persona);
+                var toggled = await _personaService.ToggleStatusAsync(id, fecha);
+                result = Ok(toggled);
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                result = BadRequest(new
                 {
                     message = ex.Message,
                     detalle = ex.InnerException?.Message
                 });
             }
+            return result;
         }
     }
 }
