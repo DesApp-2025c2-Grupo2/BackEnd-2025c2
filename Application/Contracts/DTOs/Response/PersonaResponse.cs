@@ -18,5 +18,5 @@ public class PersonaResponse
     public List<EmailDTO>? Emails { get; set; }
     public DocumentacionDTO Documentacion { get; set; }
     public List<DireccionDTO>? Direcciones { get; set; }
-    public List<SituacionTerapeuticaResponse>? SituacionesTerapeuticas { get; set; }
+    public HistorialTerapeuticoResponse? SituacionesTerapeuticas { get; set; }
 }

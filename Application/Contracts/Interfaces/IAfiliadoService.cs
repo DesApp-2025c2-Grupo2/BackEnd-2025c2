@@ -1,14 +1,13 @@
 ﻿using Application.Contracts.DTOs.Request;
 using Application.Contracts.DTOs.Response;
 
-namespace Application.Contracts.Interfaces
+namespace Application.Contracts.Interfaces;
+
+public interface IAfiliadoService
 {
-    public interface IAfiliadoService
-    {
-        Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request);
-        Task<AfiliadoResponse> GetByNumeroAsync(int numeroAfiliado);
-        Task<IEnumerable<AfiliadoResponse>> GetAllAsync();
-        Task<AfiliadoResponse> UpdateAsync(int id, AfiliadoRequest request);
-        Task DeleteAsync(int id);
-    }
+    Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request);
+    Task<AfiliadosResponse> GetAllAsync();
+    Task<bool> UpdateAsync(int id, AfiliadoRequest request);
+    Task<bool> ToggleStatus(int numeroAfiliado, bool activo, DateTime? fecha);
+    Task<AfiliadoResponse> GetByNumeroAsync(int numeroAfiliado);
 }

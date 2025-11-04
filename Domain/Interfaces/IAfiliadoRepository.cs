@@ -4,11 +4,11 @@ namespace Domain.Interfaces
 {
     public interface IAfiliadoRepository
     {
-        Task<Afiliado> GetByIdAsync(int id);
         Task<Afiliado> GetByNumeroAsync(int numeroAfiliado);
-        Task<IEnumerable<Afiliado>> GetAllAsync();
-        Task AddAsync(Afiliado afiliado);
+        Task<List<Afiliado>> GetAllAsync();
+        Task AddAsync(Afiliado afiliado,Dictionary<int,DateTime?> situacionesTerapeuticasTitular);
         Task UpdateAsync(Afiliado afiliado);
-        Task SaveChangesAsync();
+        Task<bool> ToggleStatus(int numeroAfiliado, bool activo, DateTime fecha);
+
     }
 }

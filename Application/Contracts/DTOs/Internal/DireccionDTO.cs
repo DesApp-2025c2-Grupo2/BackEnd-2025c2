@@ -5,8 +5,8 @@
         public int? Id { get; set; }
         public required string Calle { get; set; }
         public required string Altura { get; set; }
-        public string? Piso { get; set; } = string.Empty;
-        public string? Departamento { get; set; } = string.Empty;
-        public string? ProvinciaCiudad { get; set; }
+        public string Piso { get; set; } = string.Empty;
+        public string Departamento { get; set; } = string.Empty;
+        public string ProvinciaCiudad { get; set; } = string.Empty;
     }
 }

@@ -12,7 +12,7 @@ namespace Application.Contracts.DTOs.Request
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public DateTime FechaNacimiento { get; set; }
-        public Parentesco Parentesco { get; set; }
+        public int Parentesco { get; set; }
         public int AfiliadoId { get; set; }
         public DateTime Alta { get; set; }
         public DateTime? Baja { get; set; }
@@ -21,6 +21,6 @@ namespace Application.Contracts.DTOs.Request
         public List<TelefonoDTO>? Telefonos { get; set; }
         public List<EmailDTO>? Emails { get; set; }
         public List<DireccionDTO>? Direcciones { get; set; }
-        public List<int>? SituacionesTerapeuticasIds { get; set; }
+        public Dictionary<int,DateTime?> SituacionesTerapeuticas{ get; set; }
     }
 }

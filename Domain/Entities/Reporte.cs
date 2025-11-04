@@ -10,7 +10,7 @@ public class Reporte
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
-    [MaxLength(6)]
+    [MaxLength(8)]
     public string CodigoIdentificatorio { get; set; }
     [Required]
     public TipoReporte Tipo { get; set; }
