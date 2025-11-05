@@ -8,6 +8,6 @@ public interface IAfiliadoService
     Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request);
     Task<AfiliadosResponse> GetAllAsync();
     Task<bool> UpdateAsync(int id, AfiliadoRequest request);
-    Task<bool> ToggleStatus(int numeroAfiliado, bool activo, DateTime? fecha);
+    Task<bool> ToggleStatus(int afiliadoID, bool activo, DateTime? fecha);
     Task<AfiliadoResponse> GetByNumeroAsync(int numeroAfiliado);
 }

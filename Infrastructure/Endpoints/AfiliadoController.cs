@@ -126,8 +126,8 @@ namespace API.Controllers
         /// <param name="activo"></param>
         /// <param name="fecha"></param>
         /// <returns></returns>
-        [HttpPatch("toggleStatus/{numeroAfiliado}")]
-        public async Task<IActionResult> ToggleStatus([Required] int numeroAfiliado, [FromQuery] bool activo, [FromQuery] DateTime? fecha)
+        [HttpPatch("toggleStatus/{afiliadoID}")]
+        public async Task<IActionResult> ToggleStatus([Required] int afiliadoID, [FromQuery] bool activo, [FromQuery] DateTime? fecha)
         {
             ActionResult result;
             if (!ModelState.IsValid)
@@ -138,7 +138,7 @@ namespace API.Controllers
             {
                 try
                 {
-                    var toggled = await _afiliadoService.ToggleStatus(numeroAfiliado, activo, fecha);
+                    var toggled = await _afiliadoService.ToggleStatus(afiliadoID, activo, fecha);
                     result = Ok(toggled);
                 }
                 catch (Exception ex)

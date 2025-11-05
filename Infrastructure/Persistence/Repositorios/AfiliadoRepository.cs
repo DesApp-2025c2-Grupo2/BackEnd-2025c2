@@ -70,6 +70,14 @@ public class AfiliadoRepository : IAfiliadoRepository
     /// <returns></returns>
     public async Task AddAsync(Afiliado afiliado, Dictionary<int,DateTime?> situacionesTerapeuticasTitular)
     {
+        // extraemos el integrante 1 de la lista
+        Persona titular = afiliado.Integrantes[0];
+        afiliado.Integrantes.Clear();
+        var maxNumeroAfiliado = await _context.Afiliados.MaxAsync(a => (int?)a.NumeroAfiliado) ?? 0;
+        afiliado.NumeroAfiliado = maxNumeroAfiliado + 1;
+        await _context.Afiliados.AddAsync(afiliado);
+        await _context.SaveChangesAsync();
+        afiliado.Integrantes.Add(titular);
         List<SituacionTerapeutica> situaciones = await _context.SituacionesTerapeuticas
             .Where(st => situacionesTerapeuticasTitular.Keys.Contains(st.Id))
             .ToListAsync();
@@ -81,10 +89,9 @@ public class AfiliadoRepository : IAfiliadoRepository
         }).ToList();
         await _context.Personas.AddAsync(afiliado.Integrantes[0]);
         await _context.SaveChangesAsync();
+
         afiliado.TitularID = afiliado.Integrantes[0].Id;
-        var maxNumeroAfiliado = await _context.Afiliados.MaxAsync(a => (int?)a.NumeroAfiliado) ?? 0;
-        afiliado.NumeroAfiliado = maxNumeroAfiliado + 1;
-        await _context.Afiliados.AddAsync(afiliado);
+        _context.Afiliados.Update(afiliado);
         await _context.SaveChangesAsync();
     }
 

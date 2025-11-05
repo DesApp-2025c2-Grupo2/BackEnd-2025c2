@@ -55,8 +55,8 @@ namespace API.Controllers
             return result;
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([Required] int id, [FromBody] PersonaRequest request)
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromBody] PersonaRequest request)
         {
             ActionResult result;
             if (!ModelState.IsValid)
@@ -67,7 +67,7 @@ namespace API.Controllers
             {
                 try
                 {
-                    var persona = await _personaService.UpdatePersonAsync(id, request);
+                    var persona = await _personaService.UpdatePersonAsync(request);
                     result = Ok(persona);
                 }
                 catch (Exception ex)

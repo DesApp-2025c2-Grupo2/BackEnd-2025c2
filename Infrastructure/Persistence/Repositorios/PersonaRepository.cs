@@ -45,27 +45,38 @@ namespace Infrastructure.Persistence.Repositorios
                 .Include(p => p.Emails)
                 .Include(p => p.Documentacion)
                 .Include(p => p.Direcciones)
-                .Include(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date))
+                .Include(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date)).ThenInclude(rt => rt.SituacionTerapeutica)
                 .FirstOrDefaultAsync(p => p.Id == id);
             return persona;
         }
 
         public async Task<bool> ToggleStatusAsync(int id, DateTime? fecha)
         {
+            bool response = false;
             var persona = await _context.Personas.FirstOrDefaultAsync(p => p.Id == id);
             if (persona == null) throw new KeyNotFoundException("Persona no encontrada.");
-
-            if (persona.Baja == null)
+            // Verificamos el estado del afiliado asociado
+            var afiliado = await _context.Afiliados.Where(a => a.Id == persona.AfiliadoId).FirstOrDefaultAsync();
+            if (afiliado.Baja == null || afiliado.Baja.Value.Date > DateTime.Now.Date)
             {
-                persona.Baja = fecha ?? DateTime.Now.Date;
+                if (persona.Baja == null)
+                {
+                    persona.Baja = fecha ?? DateTime.Now.Date;
+                }
+                else
+                {
+                    persona.Baja = null;
+                    persona.Alta = fecha ?? DateTime.Now.Date;
+                }
+                await _context.SaveChangesAsync();
+                response = true;
             }
             else
             {
-                persona.Baja = null;
-                persona.Alta = fecha ?? DateTime.Now.Date;
+                throw new InvalidOperationException("No se puede modificar el estado de una persona cuyo afiliado está dado de baja.");
             }
-            await _context.SaveChangesAsync();
-            return true;
+
+                return response;
         }
 
         public async Task<bool> UpdateAsync(Persona persona, Dictionary<int, DateTime?> situacionesTerapeuticas)
