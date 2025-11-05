@@ -8,7 +8,7 @@ namespace Domain.Interfaces
         Task<List<Afiliado>> GetAllAsync();
         Task AddAsync(Afiliado afiliado,Dictionary<int,DateTime?> situacionesTerapeuticasTitular);
         Task UpdateAsync(Afiliado afiliado);
-        Task<bool> ToggleStatus(int numeroAfiliado, bool activo, DateTime fecha);
+        Task<bool> ToggleStatus(int afiliadoID, bool activo, DateTime fecha);
 
     }
 }

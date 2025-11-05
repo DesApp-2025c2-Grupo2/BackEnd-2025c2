@@ -31,7 +31,7 @@ namespace Application.Services
                 Apellido = request.Apellido,
                 FechaNacimiento = request.FechaNacimiento,
                 Parentesco = (Parentesco)request.Parentesco,
-                AfiliadoId = request.AfiliadoId,
+                AfiliadoId = (int)request.AfiliadoId,
                 Alta = request.Alta,
                 Baja = request.Baja,
                 Telefonos = request.Telefonos?.Select(t => new Telefono
@@ -82,9 +82,9 @@ namespace Application.Services
             return _personaRepo.ToggleStatusAsync(id, fecha ?? DateTime.Now.Date);
         }
 
-        public async Task<PersonaResponse> UpdatePersonAsync(int id, PersonaRequest request)
+        public async Task<PersonaResponse> UpdatePersonAsync(PersonaRequest request)
         {
-            var persona = await _personaRepo.GetByIdAsync(id);
+            var persona = await _personaRepo.GetByIdAsync(request.Id ?? 0);
             if (persona == null) throw new Exception("Persona no encontrada");
 
             persona.NumeroIntegrante = request.NumeroIntegrante;
@@ -92,7 +92,7 @@ namespace Application.Services
             persona.Apellido = request.Apellido;
             persona.FechaNacimiento = request.FechaNacimiento;
             persona.Parentesco = (Parentesco)request.Parentesco;
-            persona.AfiliadoId = request.AfiliadoId;
+            persona.AfiliadoId = (int)request.AfiliadoId;
             persona.Alta = request.Alta;
             persona.Baja = request.Baja;
             persona.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new List<Telefono>();

@@ -13,7 +13,7 @@ namespace Application.Contracts.DTOs.Request
         public string Apellido { get; set; }
         public DateTime FechaNacimiento { get; set; }
         public int Parentesco { get; set; }
-        public int AfiliadoId { get; set; }
+        public int? AfiliadoId { get; set; }
         public DateTime Alta { get; set; }
         public DateTime? Baja { get; set; }
 
