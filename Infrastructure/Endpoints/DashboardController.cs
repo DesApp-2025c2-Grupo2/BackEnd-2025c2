@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class DashboardController : ControllerBase
     {
         private readonly IDashboardService _dashboardService;
@@ -15,7 +15,7 @@ namespace API.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("estadisticas")]
+        [HttpGet("stats")]
         public async Task<ActionResult<DashboardResponse>> GetEstadisticas()
         {
             try
