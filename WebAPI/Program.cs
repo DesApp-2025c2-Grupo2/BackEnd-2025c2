@@ -3,6 +3,7 @@ using Infrastructure.Persistence.Configurations;
 using Infrastructure.Persistence.Seeds;
 using Infrastructure.Persistence.StoredProcedures;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using WebAPI;
 
 
@@ -38,6 +39,9 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod();
     });
 });
+
+// Configuración de licencia de QuestPDF
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

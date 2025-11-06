@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Persistence\StoredProcedures\Scripts\" />
+    <Folder Include="Persistence\StoredProcedures\Scripts\SP\" />
   </ItemGroup>
 
 </Project>
