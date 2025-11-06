@@ -16,6 +16,10 @@ public class Agenda
     [MaxLength(128)]
     public string Direccion { get; set; }
     [Required]
+    public int EspecialidadId { get; set; }
+    [Required]
+    public int DuracionConsulta { get; set; }
+    [Required]
     public DateTime Alta { get; set; }
     public DateTime? Baja { get; set; }
 }
