@@ -16,6 +16,7 @@ public static class DependencyContainer
         services.AddScoped(typeof(IEspecialidadService), typeof(EspecialidadService));
         services.AddScoped(typeof(IPersonaService), typeof(PersonaService));
         services.AddScoped(typeof(IAfiliadoService), typeof(AfiliadoService));
+        services.AddScoped(typeof(IDashboardService), typeof(DashboardService));
         return services;
     }
     public static IServiceCollection AddRepositories(this IServiceCollection services)
