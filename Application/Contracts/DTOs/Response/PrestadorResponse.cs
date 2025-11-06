@@ -9,6 +9,7 @@ public class PrestadorResponse
     public string NombreCompleto { get; set; }
     public int Rol { get; set; }
     public string? CentroMedico { get; set; }
+    public bool Activo { get; set; }
     public List<int> Especialidades { get; set; } = new List<int>();
     public DocumentacionDTO Documentacion { get; set; }
     public List<TelefonoDTO> Telefonos { get; set; } = new List<TelefonoDTO>();

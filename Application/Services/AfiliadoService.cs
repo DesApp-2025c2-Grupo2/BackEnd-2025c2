@@ -20,10 +20,28 @@ public class AfiliadoService : IAfiliadoService
 
     public async Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request)
     {
+        // === DEBUG DESERIALIZACIÓN ===
+        Console.WriteLine("========== DEBUG AfiliadoRequest recibido ==========");
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(request, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        }));
+        Console.WriteLine($"Integrantes count: {(request.Integrantes == null ? "null" : request.Integrantes.Count.ToString())}");
+
+        if (request.Integrantes != null)
+        {
+            foreach (var i in request.Integrantes)
+            {
+                Console.WriteLine($"Integrante -> {i.Nombre} {i.Apellido}, Parentesco: {i.Parentesco}, FechaNacimiento: {i.FechaNacimiento}");
+            }
+        }
+        Console.WriteLine("====================================================");
+
         // Obtenemos el titular
-        PersonaRequest? titularReq = request.Integrantes.FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular);
+        PersonaRequest? titularReq = request.Integrantes?.FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular);
         if (titularReq == null)
             throw new Exception("Debe proporcionarse un titular.");
+
         // Creamos la entidad Persona para el titular
         Persona titularEntity = new Persona()
         {
@@ -50,6 +68,7 @@ public class AfiliadoService : IAfiliadoService
                 ProvinciaCiudad = d.ProvinciaCiudad
             }).ToList() ?? new(),
         };
+
         // Creamos la entidad Afiliado
         Afiliado afiliadoEntity = new Afiliado()
         {
@@ -59,16 +78,19 @@ public class AfiliadoService : IAfiliadoService
             Baja = request.Baja,
             Integrantes = new List<Persona>() { titularEntity }
         };
+
         // Guardamos el afiliado (y el titular asociado)
         await afiliadoRepository.AddAsync(afiliadoEntity, titularReq.SituacionesTerapeuticas ?? new());
+
         // Verificamos que se haya guardado correctamente
         if (afiliadoEntity.Id == 0)
             throw new Exception("Error al crear el afiliado.");
+
         // Devolvemos el response
         AfiliadoResponse response = EntityDTOMapper.AfiliadoToDTO(afiliadoEntity);
         return response;
-
     }
+
 
     public async Task<bool> UpdateAsync(int id, AfiliadoRequest request)
     {

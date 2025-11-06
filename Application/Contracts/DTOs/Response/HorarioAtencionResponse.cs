@@ -7,4 +7,6 @@ public class HorarioAtencionResponse
     public List<string> DiasDeLaSemana { get; set; } = new List<string>();
     public string HoraInicio { get; set; }
     public string HoraFin { get; set; }
+    public int? DuracionMinutos { get; set; }
+    public List<int> Especialidades { get; set; } = new List<int>();
 }
