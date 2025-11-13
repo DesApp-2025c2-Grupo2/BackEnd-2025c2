@@ -27,4 +27,8 @@ public interface IPrestadorRepository
     Task UpdateHorarioAsync(HorarioAtencion horario);
     Task DeleteHorariosByIdsAsync(List<int> ids);
     Task<List<HorarioAtencion>> GetHorariosByAgendaAndTramoAsync(int agendaId, TimeSpan inicio, TimeSpan fin);
+
+    // Helpers por direccion
+    Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion);
+    Task DeleteAllHorariosByAgendaIdsAsync(List<int> agendaIds);
 }
