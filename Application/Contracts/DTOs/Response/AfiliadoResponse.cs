@@ -13,5 +13,5 @@ public class AfiliadoResponse
     public DateTime Alta { get; set; }
     public DateTime? Baja { get; set; }
 
-    public List<PersonaResponse>? Integrantes { get; set; }
+    public PersonasResponse? Integrantes { get; set; }
 }

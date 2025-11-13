@@ -13,10 +13,10 @@ public class Agenda
     public int ProfesionalId { get; set; }
     public Prestador Profesional { get; set; }
     [Required]
-    public int EspecialidadId { get; set; }
-    [Required]
     [MaxLength(128)]
     public string Direccion { get; set; }
+    [Required]
+    public int EspecialidadId { get; set; }
     [Required]
     public int DuracionConsulta { get; set; }
     [Required]

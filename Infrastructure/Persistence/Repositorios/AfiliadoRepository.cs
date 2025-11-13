@@ -1,77 +1,147 @@
 ﻿using Domain.Entities;
 using Infrastructure.Persistence.Configurations;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Domain.Interfaces;
 
+namespace Infrastructure.Persistence.Repositorios;
 
-namespace Infrastructure.Persistence.Repositorios
+public class AfiliadoRepository : IAfiliadoRepository
 {
-    public class AfiliadoRepository : IAfiliadoRepository
+    private readonly ProjectContext _context;
+    public AfiliadoRepository(ProjectContext context)
     {
-        private readonly ProjectContext _context;
-        public AfiliadoRepository(ProjectContext context)
+        _context = context;
+    }
+
+    // REMOVED //
+    //public async Task<Afiliado> GetByIdAsync(int id)
+    //{
+    //    return await _context.Afiliados
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Telefonos)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Emails)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Documentacion)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Direcciones)
+    //        .FirstOrDefaultAsync(a => a.Id == id);
+    //}
+    //public async Task<Afiliado> GetByNumeroAsync(int numeroAfiliado)
+    //{
+    //    return await _context.Afiliados
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Telefonos)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Emails)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Documentacion)
+    //        .Include(a => a.Integrantes)
+    //            .ThenInclude(p => p.Direcciones)
+    //        .FirstOrDefaultAsync(a => a.NumeroAfiliado == numeroAfiliado);
+    //}
+
+    public async Task<List<Afiliado>> GetAllAsync()
+    {
+        return await _context.Afiliados
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Telefonos)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Emails)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Documentacion)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Direcciones)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date)).ThenInclude(st => st.SituacionTerapeutica)
+            .ToListAsync();
+    }
+
+    // OLD VERSION //
+    //public async Task AddAsync(Afiliado afiliado)
+    //{
+    //    await _context.Afiliados.AddAsync(afiliado);
+    //}
+    
+    /// <summary>
+    /// Agrega un nuevo afiliado junto con su titular y asigna un número de afiliado único.
+    /// </summary>
+    /// <param name="afiliado"></param>
+    /// <returns></returns>
+    public async Task AddAsync(Afiliado afiliado, Dictionary<int,DateTime?> situacionesTerapeuticasTitular)
+    {
+        // extraemos el integrante 1 de la lista
+        Persona titular = afiliado.Integrantes[0];
+        afiliado.Integrantes.Clear();
+        var maxNumeroAfiliado = await _context.Afiliados.MaxAsync(a => (int?)a.NumeroAfiliado) ?? 0;
+        afiliado.NumeroAfiliado = maxNumeroAfiliado + 1;
+        await _context.Afiliados.AddAsync(afiliado);
+        await _context.SaveChangesAsync();
+        afiliado.Integrantes.Add(titular);
+        List<SituacionTerapeutica> situaciones = await _context.SituacionesTerapeuticas
+            .Where(st => situacionesTerapeuticasTitular.Keys.Contains(st.Id))
+            .ToListAsync();
+        afiliado.Integrantes[0].SituacionesTerapeuticas = situaciones.Select(st => new RegistroTerapeutico
         {
-            _context = context;
+            SituacionTerapeuticaId = st.Id,
+            FechaInicio = DateTime.Now,
+            FechaFin = situacionesTerapeuticasTitular[st.Id]
+        }).ToList();
+        await _context.Personas.AddAsync(afiliado.Integrantes[0]);
+        await _context.SaveChangesAsync();
+
+        afiliado.TitularID = afiliado.Integrantes[0].Id;
+        _context.Afiliados.Update(afiliado);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Afiliado afiliado)
+    {
+        var afiliadoEntity = await _context.Afiliados.FirstOrDefaultAsync(a => a.Id == afiliado.Id);
+        if (afiliadoEntity == null)
+        {
+            throw new KeyNotFoundException($"Afiliado no encontrado.");
+        }
+        _context.Entry(afiliadoEntity).CurrentValues.SetValues(afiliado);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> ToggleStatus(int afiliadoID, bool activo, DateTime fecha)
+    {
+        var afiliado = await _context.Afiliados.Include(a => a.Integrantes).FirstOrDefaultAsync(a => a.Id == afiliadoID);
+        if (afiliado == null)
+        {
+            throw new KeyNotFoundException($"Afiliado no encontrado.");
         }
 
-        public async Task<Afiliado> GetByIdAsync(int id)
+
+        afiliado.Baja = activo ? null : fecha;
+        afiliado.Alta = activo ? fecha : afiliado.Alta;
+
+        foreach (var integrante in afiliado.Integrantes)
         {
-            return await _context.Afiliados
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Telefonos)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Emails)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Documentacion)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Direcciones)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            integrante.Baja = activo ? null : fecha;
+            integrante.Alta = activo ? fecha : integrante.Alta;
         }
 
-        public async Task<Afiliado> GetByNumeroAsync(int numeroAfiliado)
-        {
-            return await _context.Afiliados
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Telefonos)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Emails)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Documentacion)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Direcciones)
-                .FirstOrDefaultAsync(a => a.NumeroAfiliado == numeroAfiliado);
-        }
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
-        public async Task AddAsync(Afiliado afiliado)
-        {
-            await _context.Afiliados.AddAsync(afiliado);
-        }
-
-        public async Task<IEnumerable<Afiliado>> GetAllAsync()
-        {
-            return await _context.Afiliados
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Telefonos)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Emails)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Documentacion)
-                .Include(a => a.Integrantes)
-                    .ThenInclude(p => p.Direcciones)
-                .ToListAsync();
-        }
-        public async Task UpdateAsync(Afiliado afiliado)
-        {
-            _context.Afiliados.Update(afiliado);
-        }
-
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
+    public async Task<Afiliado> GetByNumeroAsync(int numeroAfiliado)
+    {
+        var afiliado = await _context.Afiliados
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Telefonos)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Emails)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Documentacion)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.Direcciones)
+            .Include(a => a.Integrantes)
+                .ThenInclude(p => p.SituacionesTerapeuticas).ThenInclude(st => st.SituacionTerapeutica)
+            .FirstOrDefaultAsync(a => a.NumeroAfiliado == numeroAfiliado);
+        return afiliado;
     }
 }

@@ -34,5 +34,5 @@ public class Persona
     public List<Telefono> Telefonos { get; set; } = new List<Telefono>();
     public List<Email> Emails { get; set; } = new List<Email>();
     public List<Direccion> Direcciones { get; set; } = new List<Direccion>();
-    public List<SituacionTerapeutica> SituacionesTerapeuticas { get; set; } = new List<SituacionTerapeutica>();
+    public List<RegistroTerapeutico> SituacionesTerapeuticas { get; set; } = new List<RegistroTerapeutico>();
 }

@@ -18,6 +18,4 @@ public class SituacionTerapeutica
     public DateTime Alta { get; set; }
     public DateTime? Baja { get; set; }
 
-    // Navegacion bidireccional
-    public List<Persona> Personas { get; set; } = new List<Persona>();
 }
