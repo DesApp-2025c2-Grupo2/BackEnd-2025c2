@@ -106,7 +106,7 @@ public class AfiliadoRepository : IAfiliadoRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> ToggleStatus(int afiliadoID, bool activo, DateTime fecha)
+    public async Task<bool> ToggleStatus(int afiliadoID, bool activo, DateTime? fecha)
     {
         var afiliado = await _context.Afiliados.Include(a => a.Integrantes).FirstOrDefaultAsync(a => a.Id == afiliadoID);
         if (afiliado == null)
@@ -115,13 +115,31 @@ public class AfiliadoRepository : IAfiliadoRepository
         }
 
 
-        afiliado.Baja = activo ? null : fecha;
-        afiliado.Alta = activo ? fecha : afiliado.Alta;
-
-        foreach (var integrante in afiliado.Integrantes)
+        // DEBUG: Ver qué valor está recibiendo realmente
+        Console.WriteLine($"DEBUG: afiliadoID={afiliadoID}, activo={activo}, fecha={fecha}, fecha.HasValue={fecha.HasValue}");
+        if (fecha.HasValue)
         {
-            integrante.Baja = activo ? null : fecha;
-            integrante.Alta = activo ? fecha : integrante.Alta;
+            Console.WriteLine($"DEBUG: fecha.Value={fecha.Value}");
+        }
+        // Para BAJA: si activo es false y fecha es null, establecer baja como null
+        if (!activo && fecha == null)
+        {
+            afiliado.Baja = null;
+            foreach (var integrante in afiliado.Integrantes)
+            {
+                integrante.Baja = null;
+            }
+        }
+        else
+        {
+            afiliado.Baja = activo ? afiliado.Baja : fecha;
+            afiliado.Alta = activo ? (fecha ?? afiliado.Alta) : afiliado.Alta;
+
+            foreach (var integrante in afiliado.Integrantes)
+            {
+                integrante.Baja = activo ? integrante.Baja : fecha;
+                integrante.Alta = activo ? (fecha ?? integrante.Alta) : integrante.Alta;
+            }
         }
 
         await _context.SaveChangesAsync();
