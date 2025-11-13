@@ -118,16 +118,54 @@ public class PrestadorService : IPrestadorService
         return MapPrestadorToResponse(actualizado);
     }
 
-    public async Task<PrestadorResponse> UpdateHorariosAsync(int id, PrestadorHorariosRequest request)
+    public async Task<PrestadorResponse> UpdateHorariosAsync(int id, PrestadorHorariosRequest request, string strategy = "merge")
     {
-        var prestador = await prestadorRepo.GetByIdAsync(id) ?? throw new Exception("Prestador no encontrado");
+        var prestador = await prestadorRepo.GetByIdWithDetailsAsync(id) ?? throw new Exception("Prestador no encontrado");
+
+        // Eliminar explícitos por removeIds
+        if (request.RemoveIds != null && request.RemoveIds.Count > 0)
+        {
+            await prestadorRepo.DeleteHorariosByIdsAsync(request.RemoveIds.Distinct().ToList());
+        }
 
         foreach (var dir in request.Direcciones)
         {
             var sourceHorarios = (dir.HorariosAtencion != null && dir.HorariosAtencion.Any()) ? dir.HorariosAtencion : dir.Horarios;
 
+            // Asegurar lugar (Dirección) estable: si no existe y viene sin Id, crear en Prestador.Direcciones
+            var direccionTexto = (dir.Direccion ?? string.Empty).Trim();
+            if (dir.Id == null || dir.Id <= 0)
+            {
+                var existeLugar = prestador.Direcciones?.Any(d => (d.Calle ?? string.Empty).Trim() == direccionTexto) == true;
+                if (!existeLugar && !string.IsNullOrWhiteSpace(direccionTexto))
+                {
+                    prestador.Direcciones.Add(new Direccion
+                    {
+                        Calle = direccionTexto,
+                        Altura = "S/N",
+                        ProvinciaCiudad = "S/D"
+                    });
+                    await prestadorRepo.UpdateAsync(prestador);
+                }
+            }
+
+            // strategy=replace => borrar horarios actuales de todas las agendas en esa direccion para el profesional
+            if (!string.IsNullOrWhiteSpace(strategy) && strategy.Equals("replace", StringComparison.OrdinalIgnoreCase))
+            {
+                var agendasParaDireccion = await prestadorRepo.GetAgendasByProfesionalAndDireccionAsync(prestador.Id, direccionTexto);
+                var agendaIds = agendasParaDireccion.Select(a => a.Id).ToList();
+                await prestadorRepo.DeleteAllHorariosByAgendaIdsAsync(agendaIds);
+            }
+
             foreach (var h in sourceHorarios)
             {
+                // Borrado por flag 'deleted' o por removeIds ya manejado arriba
+                if ((h.Deleted ?? false) && h.Id.HasValue && h.Id.Value > 0)
+                {
+                    await prestadorRepo.DeleteHorariosByIdsAsync(new List<int> { h.Id.Value });
+                    continue;
+                }
+
                 var dias = (h.DiasDeLaSemana != null && h.DiasDeLaSemana.Any()) ? h.DiasDeLaSemana : new List<int> { h.DiaSemana };
                 if (dias.Count == 0) continue;
 
@@ -142,14 +180,14 @@ public class PrestadorService : IPrestadorService
                 foreach (var especialidadId in especialidades)
                 {
                     // Asegurar agenda por profesional+especialidad+direccion
-                    var agenda = await prestadorRepo.GetAgendaAsync(prestador.Id, especialidadId, dir.Direccion);
+                    var agenda = await prestadorRepo.GetAgendaAsync(prestador.Id, especialidadId, direccionTexto);
                     if (agenda == null)
                     {
                         agenda = new Agenda
                         {
                             ProfesionalId = prestador.Id,
                             EspecialidadId = especialidadId,
-                            Direccion = dir.Direccion,
+                            Direccion = direccionTexto,
                             DuracionConsulta = duracion,
                             Alta = DateTime.UtcNow
                         };
@@ -157,7 +195,7 @@ public class PrestadorService : IPrestadorService
                         await prestadorRepo.SaveChangesAsync();
                     }
 
-                    if (h.Id.HasValue)
+                    if (h.Id.HasValue && h.Id.Value > 0)
                     {
                         var anchor = await prestadorRepo.GetHorarioByIdAsync(h.Id.Value);
                         if (anchor != null)

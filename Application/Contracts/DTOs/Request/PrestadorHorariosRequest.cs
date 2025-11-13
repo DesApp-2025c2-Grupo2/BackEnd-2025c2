@@ -3,6 +3,7 @@ namespace Application.Contracts.DTOs.Request;
 public class PrestadorHorariosRequest
 {
     public List<DireccionHorariosDTO> Direcciones { get; set; } = new();
+    public List<int> RemoveIds { get; set; } = new();
 }
 
 public class DireccionHorariosDTO
@@ -23,6 +24,7 @@ public class HorarioEdicionDTO
     public string HoraFin { get; set; }    // HH:mm
     public List<int> Especialidades { get; set; } = new();
     public int? DuracionMinutos { get; set; }
+    public bool? Deleted { get; set; }
 }
 
 

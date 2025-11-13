@@ -148,6 +148,22 @@ public class PrestadorRepository : IPrestadorRepository
     {
         return await context.Agendas.Where(a => a.ProfesionalId == profesionalId).ToListAsync();
     }
+
+    public async Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion)
+    {
+        return await context.Agendas
+            .Where(a => a.ProfesionalId == profesionalId && a.Direccion == direccion)
+            .ToListAsync();
+    }
+
+    public async Task DeleteAllHorariosByAgendaIdsAsync(List<int> agendaIds)
+    {
+        if (agendaIds == null || agendaIds.Count == 0) return;
+        var existentes = await context.HorariosAtencion.Where(h => agendaIds.Contains(h.AgendaId)).ToListAsync();
+        if (existentes.Count == 0) return;
+        context.HorariosAtencion.RemoveRange(existentes);
+        await context.SaveChangesAsync();
+    }
 }
 
 
