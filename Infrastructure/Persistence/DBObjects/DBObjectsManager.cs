@@ -2,11 +2,11 @@
 using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence.StoredProcedures;
+namespace Infrastructure.Persistence.DBObjects;
 
 public static class DBObjectsManager
 {
-    public static async Task StarterAsync(ProjectContext context, IProjectLogger logger)
+    public static async Task CreateDBObjectsAsync(ProjectContext context, IProjectLogger logger)
     {
        
     }
