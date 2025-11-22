@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20251113200536_UpdateReportEntityMigration")]
+    partial class UpdateReportEntityMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,10 +127,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("CALLE");
-
-                    b.Property<int>("CodigoPostal")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("CODIGOPOSTAL");
 
                     b.Property<string>("Departamento")
                         .HasMaxLength(16)

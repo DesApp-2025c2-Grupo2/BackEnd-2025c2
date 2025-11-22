@@ -19,6 +19,8 @@ public class Direccion
     [MaxLength(16)]
     public string? Departamento { get; set; }
     [Required]
+    public int CodigoPostal { get; set; } = 0;
+    [Required]
     [MaxLength(128)]
     public string ProvinciaCiudad { get; set; }
     [ForeignKey(nameof(Persona))]
