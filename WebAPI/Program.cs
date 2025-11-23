@@ -1,8 +1,9 @@
 ﻿using Application.Utilities;
 using Infrastructure.Persistence.Configurations;
+using Infrastructure.Persistence.DBObjects;
 using Infrastructure.Persistence.Seeds;
-using Infrastructure.Persistence.StoredProcedures;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using WebAPI;
 
 
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Inyección de DbContext
 builder.Services.AddDbContext<ProjectContext>();
+
+// Inyección de servicios externos
+builder.Services.AddExternalServices();
 
 // Inyección de servicios
 builder.Services.AddServices();
@@ -43,6 +47,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+// Configuro la licencia de QuestPDF
+QuestPDF.Settings.License = LicenseType.Community;
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,7 +66,7 @@ using (var serviceScope = app.Services.CreateScope())
     context.Database.Migrate();
     logger.LogInformation("Base de datos migrada correctamente.");
     await SeedManager.InitializeAsync(context, logger); // Orquestadora de Seeds
-    //await SPManager.InitializeAsync(context, logger); // Orquestadora de Stored Procedures
+    //await SPManager.InitializeAsync(context, logger); // Orquestadora de Objetos de DB
 }
 // Acá hubo que adaptar la compatibilidad de la versión de Swagger
 app.UseSwagger(options =>
@@ -72,5 +80,7 @@ app.UseSwaggerUI();
 //app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseStaticFiles();
 
 app.Run();

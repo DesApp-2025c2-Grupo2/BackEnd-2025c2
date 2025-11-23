@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BRPDF" Version="2025.7.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
       <PrivateAssets>all</PrivateAssets>
@@ -15,6 +16,7 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="8.23.90" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.9.1" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
   </ItemGroup>
 
@@ -23,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Persistence\StoredProcedures\Scripts\" />
+    <EmbeddedResource Include="Persistence\DBObjects\Packages\**\*.sql" />
   </ItemGroup>
-
+  
 </Project>

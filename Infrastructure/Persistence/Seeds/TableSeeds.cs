@@ -251,7 +251,7 @@ public static class TableSeeds
             new Afiliado()
             {
                 Id = 1,
-                NumeroAfiliado = 100001,
+                NumeroAfiliado = 1,
                 TitularID = 1,
                 PlanMedicoId = 1,
                 Alta = DateTime.Parse("2024-01-15").Date,
@@ -261,7 +261,7 @@ public static class TableSeeds
             new Afiliado()
             {
                 Id = 2,
-                NumeroAfiliado = 100002,
+                NumeroAfiliado = 2,
                 TitularID = 3,
                 PlanMedicoId = 2,
                 Alta = DateTime.Parse("2024-02-20").Date,
@@ -271,7 +271,7 @@ public static class TableSeeds
             new Afiliado()
             {
                 Id = 3,
-                NumeroAfiliado = 100003,
+                NumeroAfiliado = 3,
                 TitularID = 5,
                 PlanMedicoId = 3,
                 Alta = DateTime.Parse("2024-03-10").Date,
@@ -282,7 +282,7 @@ public static class TableSeeds
 
     public static List<Persona> Personas() => new List<Persona>()
         {
-            // Familia González - Afiliado 100001
+            // Familia González - Afiliado 1
             new Persona()
             {
                 Id = 1,
@@ -352,7 +352,7 @@ public static class TableSeeds
                 }
             },
 
-            // Familia Rodríguez - Afiliado 100002
+            // Familia Rodríguez - Afiliado 2
             new Persona()
             {
                 Id = 3,
@@ -413,7 +413,7 @@ public static class TableSeeds
                 }
             },
 
-            // Afiliado individual - Afiliado 100003 (dado de baja)
+            // Afiliado individual - Afiliado 3 (dado de baja)
             new Persona()
             {
                 Id = 5,

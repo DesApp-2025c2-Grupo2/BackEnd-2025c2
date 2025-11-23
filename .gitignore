@@ -565,4 +565,9 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
+### Custom ignores or exceptions ###
+
+# Permitir mis scripts SQL en la carpeta de infraestructura
+!Infrastructure/Persistence/DBObjects/Packages/**
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,visualstudiocode,sublimetext,notepadpp,intellij
