@@ -15,36 +15,32 @@
                                         DSTARTDATE      IN DATE DEFAULT NULL,
                                         DENDDATE        IN DATE DEFAULT NULL,
                                         NAFILIADOID     IN NUMBER DEFAULT NULL,
+                                        HEXAID          OUT NVARCHAR2,
                                         REPORTCURSOR    OUT SYS_REFCURSOR
   );
   -- Reporte 1: Altas de Afiliados por período
-  PROCEDURE REPORTE_AFILIADOS ( SCODE           IN NVARCHAR2,
-                                DSTARTDATE      IN DATE,
+  PROCEDURE REPORTE_AFILIADOS ( DSTARTDATE      IN DATE,
                                 DENDDATE        IN DATE,
                                 REPORTCURSOR    IN OUT SYS_REFCURSOR
   );
 
   -- Reporte 2: Altas de Prestadores por período
-  PROCEDURE REPORTE_PRESTADORES ( SCODE         IN NVARCHAR2,
-                                  DSTARTDATE    IN DATE,
+  PROCEDURE REPORTE_PRESTADORES ( DSTARTDATE    IN DATE,
                                   DENDDATE      IN DATE,
                                   REPORTCURSOR  IN OUT SYS_REFCURSOR
   );
 
   -- Reporte 3: Prestadores por Especialidad y Código Postal
-  PROCEDURE REPORTE_ESPECIALIDAD_CP (   SCODE           IN NVARCHAR2,
-                                        REPORTCURSOR    IN OUT SYS_REFCURSOR
+  PROCEDURE REPORTE_ESPECIALIDAD_CP (   REPORTCURSOR    IN OUT SYS_REFCURSOR
   );
 
   -- Reporte 4: Situaciones Terapéuticas por Afiliado
-  PROCEDURE REPORTE_SITUACIONES ( SCODE         IN NVARCHAR2,
-                                  NAFILIADOID   IN NUMBER,
+  PROCEDURE REPORTE_SITUACIONES ( NAFILIADOID   IN NUMBER,
                                   REPORTCURSOR  IN OUT SYS_REFCURSOR
   );
 
   -- Reporte 5: Prestadores sin Agenda de Turnos
-  PROCEDURE REPORTE_SIN_AGENDA ( SCODE          IN NVARCHAR2,
-                                 REPORTCURSOR   IN OUT SYS_REFCURSOR 
+  PROCEDURE REPORTE_SIN_AGENDA ( REPORTCURSOR   IN OUT SYS_REFCURSOR 
   );
 
 END REPORTDATAGENERATOR;
