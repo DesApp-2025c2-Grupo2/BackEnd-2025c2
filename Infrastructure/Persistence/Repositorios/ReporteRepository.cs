@@ -109,7 +109,7 @@ public class ReporteRepository : IReporteRepository
         return reportes;
     }
 
-    public async Task<DataTable> RetrieveAsync(string hexaID)
+    public async Task<(string, DataTable)> RetrieveAsync(string hexaID)
     {
         DataTable reportData;
 
@@ -153,6 +153,7 @@ public class ReporteRepository : IReporteRepository
                     reportData = new DataTable();
                     reportData.Load(reader);
                 }
+                hexaID = pHexaID.Value.ToString() ?? string.Empty;
             }
             finally
             {
@@ -161,7 +162,7 @@ public class ReporteRepository : IReporteRepository
 
         }
 
-        return reportData;
+        return (hexaID, reportData);
 
     }
 }

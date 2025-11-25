@@ -6,6 +6,6 @@ namespace Domain.Interfaces;
 public interface IReporteRepository
 {
     Task<List<Reporte>> GetAllAsync();
-    Task<DataTable> RetrieveAsync(string hexaID);
+    Task<(string,DataTable)> RetrieveAsync(string hexaID);
     Task<(string,DataTable)> GenerateAsync(Reporte reporte);
 }
