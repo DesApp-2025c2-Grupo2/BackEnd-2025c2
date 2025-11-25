@@ -1,7 +1,9 @@
-﻿using Application.Contracts.DTOs.Request;
+﻿using Application.Contracts.DTOs.Internal.ReportData;
+using Application.Contracts.DTOs.Request;
 using Application.Contracts.DTOs.Response;
 using Application.Contracts.ExternalServicesInterfaces;
 using Application.Contracts.Interfaces;
+using Application.Utilities;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
@@ -29,24 +31,18 @@ public class ReporteService : IReporteService
             AfiliadoId = reporteRequest.AfiliadoId,
             FechaGeneracion = DateTime.Now.Date
         };
+        string hexaId;
+        DataTable reporteData;
+        (hexaId,reporteData) = await repository.GenerateAsync(reporte);
 
-        (string,DataTable) reporteData = await repository.GenerateAsync(reporte);
+        if (reporteData == null) throw new Exception("Error al generar los datos del reporte.");
 
-        if (reporteData.Item2 == null) throw new Exception("Error al generar los datos del reporte.");
+        //hexaId = hexaId.PadLeft(8, '0');
 
-        //reporteData.Item1 = reporteData.Item1.PadLeft(8, '0');
+        //Segun el tipo de reporte genero el PDF correspondiente
+        byte[] pdfBytes = GetReport(reporte.Tipo, hexaId, reporteData);
 
-        byte[] pdfBytes = (TipoReporte)reporteRequest.TipoReporte switch
-        {
-            TipoReporte.AltaAfiliadosPorPeriodo => pdfGenerator.GenerateAltaAfiliadosAsync(reporteData),
-            TipoReporte.AltaPrestadoresPorPeriodo => pdfGenerator.GenerateAltaPrestadoresAsync(reporteData),
-            TipoReporte.PrestadoresPorEspecialidadYCodigoPostal => pdfGenerator.GeneratePrestadoresPorEspecialidadYCodigoPostalAsync(reporteData),
-            TipoReporte.SituacionesTerapeuticasPorAfiliado => pdfGenerator.GenerateSituacionesTerapeuticasPorAfiliadoAsync(reporteData),
-            TipoReporte.PrestadoresSinAgendas => pdfGenerator.GeneratePrestadoresSinAgendasAsync(reporteData),
-            _ => throw new NotImplementedException("Tipo de reporte no soportado")
-        };
-
-        return (reporteData.Item1, pdfBytes);
+        return (hexaId, pdfBytes);
     }
 
     public async Task<ReportesResponse> GetAllAsync()
@@ -67,8 +63,7 @@ public class ReporteService : IReporteService
         return response;
     }
 
-
-    public async Task<byte[]> RetrieveAsync(string hexaId, int tipo)
+    public async Task<(string, byte[])> RetrieveAsync(string hexaId, int tipo)
     {
         TipoReporte tipoReporte;
         try
@@ -79,18 +74,42 @@ public class ReporteService : IReporteService
         {
             throw new ArgumentException("Tipo de reporte inválido.");
         }
-        DataTable reporteData = await repository.RetrieveAsync(hexaId);
-        byte[] pdfBytes = tipoReporte switch
-        {
-            TipoReporte.AltaAfiliadosPorPeriodo => pdfGenerator.GenerateAltaAfiliadosAsync((hexaId,reporteData)),
-            TipoReporte.AltaPrestadoresPorPeriodo => pdfGenerator.GenerateAltaPrestadoresAsync((hexaId, reporteData)),
-            TipoReporte.PrestadoresPorEspecialidadYCodigoPostal => pdfGenerator.GeneratePrestadoresPorEspecialidadYCodigoPostalAsync((hexaId, reporteData)),
-            TipoReporte.SituacionesTerapeuticasPorAfiliado => pdfGenerator.GenerateSituacionesTerapeuticasPorAfiliadoAsync((hexaId, reporteData)),
-            TipoReporte.PrestadoresSinAgendas => pdfGenerator.GeneratePrestadoresSinAgendasAsync((hexaId, reporteData)),
-            _ => throw new NotImplementedException("Tipo de reporte no soportado")
-        };
-        return pdfBytes;
+        DataTable reporteData;
+        (hexaId, reporteData) = await repository.RetrieveAsync(hexaId);
+
+        //Segun el tipo de reporte genero el PDF correspondiente
+        byte[] pdfBytes = GetReport(tipoReporte, hexaId, reporteData);
+        return (hexaId, pdfBytes);
 
     }
 
+    private byte[] GetReport(TipoReporte tipo, string hexaID,DataTable dataTable)
+    {
+        byte[] pdfBytes;
+        pdfBytes = tipo switch
+        {
+            TipoReporte.AltaAfiliadosPorPeriodo => pdfGenerator.GenerateReportPDF(
+                hexaID,
+                DTOMapper.ToReportDataList<AltaAfiliadosPorPeriodoReportDataRow>(dataTable)
+            ),
+            TipoReporte.AltaPrestadoresPorPeriodo => pdfGenerator.GenerateReportPDF(
+                hexaID,
+                DTOMapper.ToReportDataList<AltaPrestadoresPorPeriodoReportDataRow>(dataTable)
+            ),
+            TipoReporte.PrestadoresPorEspecialidadYCodigoPostal => pdfGenerator.GenerateReportPDF(
+                hexaID,
+                DTOMapper.ToReportDataList<PrestadoresPorEspecialidadYCodigoPostalReportDataRow>(dataTable)
+            ),
+            TipoReporte.SituacionesTerapeuticasPorAfiliado => pdfGenerator.GenerateReportPDF(
+                hexaID,
+                DTOMapper.ToReportDataList<SituacionesTerapeuticasPorAfiliadoReportDataRow>(dataTable)
+            ),
+            TipoReporte.PrestadoresSinAgendas => pdfGenerator.GenerateReportPDF(
+                hexaID,
+                DTOMapper.ToReportDataList<PrestadoresSinAgendasReportDataRow>(dataTable)
+            ),
+            _ => throw new NotImplementedException("Tipo de reporte no soportado")
+        };
+        return pdfBytes;
+    }
 }

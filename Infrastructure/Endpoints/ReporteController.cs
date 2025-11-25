@@ -44,13 +44,13 @@ public class ReporteController : ControllerBase
         try
         {
             var reporteData = await service.RetrieveAsync(hexaId,tipo);
-            if (reporteData == null || reporteData.Length == 0)
+            if (reporteData.Item2 == null || reporteData.Item2.Length == 0)
             {
                 result = NotFound("Reporte no encontrado.");
             }
             else
             {
-                result = File(reporteData, "application/pdf", $"reporte_{hexaId}.pdf");
+                result = File(reporteData.Item2, "application/pdf", $"reporte_{reporteData.Item1}.pdf");
             }
         }
         catch (Exception ex)
@@ -67,7 +67,7 @@ public class ReporteController : ControllerBase
         ActionResult result;
         try
         {
-            (string,byte[]) reporteData = await service.GenerateAsync(reporteRequest);
+            var reporteData = await service.GenerateAsync(reporteRequest);
             result = File(reporteData.Item2, "application/pdf", $"reporte_{reporteData.Item1}.pdf");
         }
         catch (Exception ex)

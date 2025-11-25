@@ -1,10 +1,13 @@
 ﻿using Application.Contracts.DTOs.Response;
 using Domain.Entities;
 using Application.Contracts.DTOs.Internal;
+using Application.Contracts.DTOs.Internal.ReportData;
+using System.Data;
+using Domain.Enums;
 
 namespace Application.Utilities;
 
-public static class EntityDTOMapper
+public static class DTOMapper
 {
     public static AfiliadoResponse AfiliadoToDTO(Afiliado afiliado)
     {
@@ -73,4 +76,32 @@ public static class EntityDTOMapper
         );
         return dto;
     }
+
+    public static ReportDataList<T> ToReportDataList<T>(this DataTable table) where T : ReportDataRow, new()
+    {
+        var list = new ReportDataList<T>();
+
+        foreach (DataRow row in table.Rows)
+        {
+            var item = new T();
+
+            // Mapeo automático por nombre de propiedad
+            foreach (var prop in typeof(T).GetProperties())
+            {
+                if (!table.Columns.Contains(prop.Name)) continue;
+
+                var value = row[prop.Name];
+
+                if (value == DBNull.Value) value = null;
+
+                // Asignación reflejada
+                prop.SetValue(item, value);
+            }
+
+            list.Add(item);
+        }
+
+        return list;
+    }
+
 }

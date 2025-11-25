@@ -74,7 +74,11 @@ public class ProjectContext : DbContext
             j => j.HasOne<Especialidad>().WithMany().HasForeignKey("ESPECIALIDADID"),
             j => j.HasOne<Prestador>().WithMany().HasForeignKey("PRESTADORID")
         );
-
+        // configuramos para que la propiedad "CodigoIdentificatorio" de Reporte sea char(8)
+        modelBuilder.Entity<Reporte>(entity =>
+        {
+            entity.Property(e => e.CodigoIdentificatorio).HasColumnType("CHAR(8)").IsFixedLength().HasMaxLength(8); 
+        });
 
         base.OnModelCreating(modelBuilder);
     }

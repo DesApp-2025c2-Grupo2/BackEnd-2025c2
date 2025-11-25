@@ -77,7 +77,7 @@ public class ReporteRepository : IReporteRepository
             command.Parameters.Add(pCursor);
 
             // HEXAID OUT
-            var pHexaID = new OracleParameter("HEXAID", OracleDbType.NVarchar2, 8)
+            var pHexaID = new OracleParameter("HEXAID", OracleDbType.Char, 8)
             {
                 Direction = ParameterDirection.Output
             };
@@ -109,7 +109,7 @@ public class ReporteRepository : IReporteRepository
         return reportes;
     }
 
-    public async Task<DataTable> RetrieveAsync(string hexaID)
+    public async Task<(string, DataTable)> RetrieveAsync(string hexaID)
     {
         DataTable reportData;
 
@@ -122,7 +122,7 @@ public class ReporteRepository : IReporteRepository
             if (command is OracleCommand oc) oc.BindByName = true;
 
             // SCODE IN
-            var pScode = new OracleParameter("SCODE", OracleDbType.NVarchar2)
+            var pScode = new OracleParameter("SCODE", OracleDbType.Char, 8)
             {
                 Direction = ParameterDirection.Input,
                 Value = hexaID
@@ -137,7 +137,7 @@ public class ReporteRepository : IReporteRepository
             command.Parameters.Add(pCursor);
 
             // HEXAID OUT
-            var pHexaID = new OracleParameter("HEXAID", OracleDbType.NVarchar2, 8)
+            var pHexaID = new OracleParameter("HEXAID", OracleDbType.Char, 8)
             {
                 Direction = ParameterDirection.Output
             };
@@ -153,6 +153,7 @@ public class ReporteRepository : IReporteRepository
                     reportData = new DataTable();
                     reportData.Load(reader);
                 }
+                hexaID = pHexaID.Value.ToString() ?? string.Empty;
             }
             finally
             {
@@ -161,7 +162,7 @@ public class ReporteRepository : IReporteRepository
 
         }
 
-        return reportData;
+        return (hexaID, reportData);
 
     }
 }

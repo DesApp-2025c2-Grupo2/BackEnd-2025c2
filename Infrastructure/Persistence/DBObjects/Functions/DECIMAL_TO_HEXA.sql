@@ -1,5 +1,5 @@
 ﻿CREATE OR REPLACE FUNCTION DECIMAL_TO_HEXA (NDECIMAL IN NUMBER)
-RETURN NVARCHAR2 IS
+RETURN REPORTES.CODIGOIDENTIFICATORIO%TYPE IS
 /*--------------------------------------------------------------------------*/
 /*  Function: DECIMAL_TO_HEXA												*/
 /*  Objetivo: Convierte un número decimal a su representación hexadecimal.	*/

@@ -15,7 +15,7 @@ public interface IReporteService
     /// </summary>
     /// <param name="hexaId"></param>
     /// <param name="tipo"></param>
-    Task<byte[]> RetrieveAsync(string hexaId, int tipo);
+    Task<(string, byte[])> RetrieveAsync(string hexaId, int tipo);
     /// <summary>
     /// Genera un reporte.
     /// </summary>
