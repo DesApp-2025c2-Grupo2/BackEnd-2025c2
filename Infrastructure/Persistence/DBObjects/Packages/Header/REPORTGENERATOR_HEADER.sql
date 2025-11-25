@@ -1,4 +1,4 @@
-﻿create or replace PACKAGE REPORTDATAGENERATOR AS
+﻿CREATE OR REPLACE PACKAGE REPORTDATAGENERATOR AS
   /*----------------------------------------------------------------*/
   /*  Package: REPORTDATAGENERATOR                                  */
   /*  Descripción: Generación de reportes del módulo Administración */

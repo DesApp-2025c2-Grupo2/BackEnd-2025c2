@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE FUNCTION HEXA_TO_DECIMAL (NHEXA IN NVARCHAR2)
+﻿CREATE OR REPLACE FUNCTION HEXA_TO_DECIMAL (NHEXA IN REPORTES.CODIGOIDENTIFICATORIO%TYPE)
 RETURN NUMBER IS
 /*--------------------------------------------------------------------------*/
 /*  Function: HEXA_TO_DECIMAL                                                */
