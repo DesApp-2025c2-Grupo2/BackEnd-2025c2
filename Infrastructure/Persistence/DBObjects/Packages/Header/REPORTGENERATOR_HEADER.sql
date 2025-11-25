@@ -10,12 +10,12 @@
   /*    5. Prestadores sin Agenda de Turnos                         */
   /*----------------------------------------------------------------*/
   -- Procedure principal que actúa como router
-  PROCEDURE CREATERETRIEVEREPORTDATA (  SCODE           IN NVARCHAR2 DEFAULT NULL,
-                                        NTYPEREPORT     IN NUMBER DEFAULT NULL,
-                                        DSTARTDATE      IN DATE DEFAULT NULL,
-                                        DENDDATE        IN DATE DEFAULT NULL,
-                                        NAFILIADOID     IN NUMBER DEFAULT NULL,
-                                        HEXAID          OUT NVARCHAR2,
+  PROCEDURE CREATERETRIEVEREPORTDATA (  SCODE           IN  REPORTES.CODIGOIDENTIFICATORIO%TYPE DEFAULT NULL,
+                                        NTYPEREPORT     IN  REPORTES.TIPO%TYPE DEFAULT NULL,
+                                        DSTARTDATE      IN  REPORTES.FECHADESDE%TYPE DEFAULT NULL,
+                                        DENDDATE        IN  REPORTES.FECHAHASTA%TYPE DEFAULT NULL,
+                                        NAFILIADOID     IN  REPORTES.AFILIADOID%TYPE DEFAULT NULL,
+                                        HEXAID          OUT REPORTES.CODIGOIDENTIFICATORIO%TYPE,
                                         REPORTCURSOR    OUT SYS_REFCURSOR
   );
   -- Reporte 1: Altas de Afiliados por período
