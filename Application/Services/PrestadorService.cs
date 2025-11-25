@@ -24,6 +24,7 @@ public class PrestadorService : IPrestadorService
             NombreCompleto = request.NombreCompleto,
             Rol = (RolMedico)request.Rol,
             CentroMedico = request.CentroMedico,
+            CentroId = request.CentroId,
             Alta = DateTime.UtcNow
         };
 
@@ -76,6 +77,7 @@ public class PrestadorService : IPrestadorService
         prestador.NombreCompleto = request.NombreCompleto;
         prestador.Rol = (RolMedico)request.Rol;
         prestador.CentroMedico = request.CentroMedico;
+        prestador.CentroId = request.CentroId;
 
         // Documentación: sólo actualizar/agregar si viene en el request. No borrar lo existente.
         if (!string.IsNullOrWhiteSpace(request.Documentacion))
@@ -121,6 +123,7 @@ public class PrestadorService : IPrestadorService
     public async Task<PrestadorResponse> UpdateHorariosAsync(int id, PrestadorHorariosRequest request, string strategy = "merge")
     {
         var prestador = await prestadorRepo.GetByIdWithDetailsAsync(id) ?? throw new Exception("Prestador no encontrado");
+        var esCentro = prestador.Rol == RolMedico.CentroMedico;
 
         // Eliminar explícitos por removeIds
         if (request.RemoveIds != null && request.RemoveIds.Count > 0)
@@ -166,6 +169,13 @@ public class PrestadorService : IPrestadorService
                     continue;
                 }
 
+                // Determinar el profesional al que se le asigna el horario:
+                // - Si el prestador es un Centro Médico => usar h.ProfesionalId (obligatorio)
+                // - Si es un profesional independiente => usar el propio prestador.Id
+                var profesionalId = esCentro
+                    ? h.ProfesionalId ?? throw new Exception("Debe especificar ProfesionalId para horarios de un centro médico.")
+                    : prestador.Id;
+
                 var dias = (h.DiasDeLaSemana != null && h.DiasDeLaSemana.Any()) ? h.DiasDeLaSemana : new List<int> { h.DiaSemana };
                 if (dias.Count == 0) continue;
 
@@ -180,12 +190,12 @@ public class PrestadorService : IPrestadorService
                 foreach (var especialidadId in especialidades)
                 {
                     // Asegurar agenda por profesional+especialidad+direccion
-                    var agenda = await prestadorRepo.GetAgendaAsync(prestador.Id, especialidadId, direccionTexto);
+                    var agenda = await prestadorRepo.GetAgendaAsync(profesionalId, especialidadId, direccionTexto);
                     if (agenda == null)
                     {
                         agenda = new Agenda
                         {
-                            ProfesionalId = prestador.Id,
+                            ProfesionalId = profesionalId,
                             EspecialidadId = especialidadId,
                             Direccion = direccionTexto,
                             DuracionConsulta = duracion,
@@ -314,6 +324,7 @@ public class PrestadorService : IPrestadorService
             NombreCompleto = p.NombreCompleto,
             Rol = (int)p.Rol,
             CentroMedico = p.CentroMedico,
+            ProfesionalesIds = p.Profesionales?.Select(pr => pr.Id).ToList() ?? new List<int>(),
             Activo = p.Baja == null || (p.Baja.HasValue && p.Baja.Value.Date > DateTime.Now.Date),
             Especialidades = p.Especialidades?.Select(e => e.Id).ToList() ?? new(),
             Documentacion = p.Documentaciones != null && p.Documentaciones.Any() ? new DocumentacionDTO

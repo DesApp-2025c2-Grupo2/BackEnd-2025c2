@@ -21,6 +21,7 @@ public class PrestadorRepository : IPrestadorRepository
     public async Task<IEnumerable<Prestador>> GetAllAsync()
     {
         return await context.Prestadores
+            .Include(p => p.Profesionales)
             .Include(p => p.Telefonos)
             .Include(p => p.Emails)
             .Include(p => p.Documentaciones)
@@ -37,6 +38,7 @@ public class PrestadorRepository : IPrestadorRepository
     public async Task<Prestador?> GetByIdWithDetailsAsync(int id)
     {
         return await context.Prestadores
+            .Include(p => p.Profesionales)
             .Include(p => p.Telefonos)
             .Include(p => p.Emails)
             .Include(p => p.Documentaciones)
