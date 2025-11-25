@@ -87,7 +87,7 @@ public class AfiliadoService : IAfiliadoService
             throw new Exception("Error al crear el afiliado.");
 
         // Devolvemos el response
-        AfiliadoResponse response = EntityDTOMapper.AfiliadoToDTO(afiliadoEntity);
+        AfiliadoResponse response = DTOMapper.AfiliadoToDTO(afiliadoEntity);
         return response;
     }
 
@@ -114,7 +114,7 @@ public class AfiliadoService : IAfiliadoService
         var afiliadosEntities = await afiliadoRepository.GetAllAsync();
         afiliadosEntities.ForEach(afiliado =>
         {
-            var afiliadoDTO = EntityDTOMapper.AfiliadoToDTO(afiliado);
+            var afiliadoDTO = DTOMapper.AfiliadoToDTO(afiliado);
             response.Add(afiliadoDTO);
         });
         return response;
@@ -126,7 +126,7 @@ public class AfiliadoService : IAfiliadoService
         var afiliadoEntity = await afiliadoRepository.GetByNumeroAsync(numeroAfiliado);
         if (afiliadoEntity == null) throw new KeyNotFoundException("Afiliado no encontrado.");
         
-        response = EntityDTOMapper.AfiliadoToDTO(afiliadoEntity);
+        response = DTOMapper.AfiliadoToDTO(afiliadoEntity);
         return response;
     }
 

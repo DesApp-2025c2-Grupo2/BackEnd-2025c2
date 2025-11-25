@@ -60,7 +60,7 @@ namespace Application.Services
             await _personaRepo.AddAsync(persona,request.SituacionesTerapeuticas);
             if (persona.Id!= 0)
             {
-                return EntityDTOMapper.PersonaToDTO(persona);
+                return DTOMapper.PersonaToDTO(persona);
             }
             else
             {
@@ -73,7 +73,7 @@ namespace Application.Services
             PersonaResponse response;
             var personaEntity = await _personaRepo.GetByIdAsync(id);
             if (personaEntity == null) throw new KeyNotFoundException("Familiar no encontrado.");
-            response = EntityDTOMapper.PersonaToDTO(personaEntity);
+            response = DTOMapper.PersonaToDTO(personaEntity);
             return response;
         }
 
@@ -111,7 +111,7 @@ namespace Application.Services
                 Numero = request.Documentacion.numero,
             };
             await _personaRepo.UpdateAsync(persona, request.SituacionesTerapeuticas);
-            return EntityDTOMapper.PersonaToDTO(persona);
+            return DTOMapper.PersonaToDTO(persona);
         }
 
     }
