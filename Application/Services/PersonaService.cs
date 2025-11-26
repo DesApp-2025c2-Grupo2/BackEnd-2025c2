@@ -31,7 +31,7 @@ namespace Application.Services
                 Apellido = request.Apellido,
                 FechaNacimiento = request.FechaNacimiento,
                 Parentesco = (Parentesco)request.Parentesco,
-                AfiliadoId = (int)request.AfiliadoId,
+                AfiliadoId = request.AfiliadoId.HasValue ? (int)request.AfiliadoId.Value : 0, // Manejo de null
                 Alta = request.Alta,
                 Baja = request.Baja,
                 Telefonos = request.Telefonos?.Select(t => new Telefono
@@ -57,8 +57,8 @@ namespace Application.Services
                 }
             };
 
-            await _personaRepo.AddAsync(persona,request.SituacionesTerapeuticas);
-            if (persona.Id!= 0)
+            await _personaRepo.AddAsync(persona, request.SituacionesTerapeuticas);
+            if (persona.Id != 0)
             {
                 return DTOMapper.PersonaToDTO(persona);
             }
@@ -92,7 +92,7 @@ namespace Application.Services
             persona.Apellido = request.Apellido;
             persona.FechaNacimiento = request.FechaNacimiento;
             persona.Parentesco = (Parentesco)request.Parentesco;
-            persona.AfiliadoId = (int)request.AfiliadoId;
+            persona.AfiliadoId = request.AfiliadoId.HasValue ? (int)request.AfiliadoId.Value : 0; // Manejo de null
             persona.Alta = request.Alta;
             persona.Baja = request.Baja;
             persona.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new List<Telefono>();
@@ -110,8 +110,15 @@ namespace Application.Services
                 TipoDocumento = (Domain.Enums.TipoDocumento)request.Documentacion.tipoDocumento,
                 Numero = request.Documentacion.numero,
             };
-            await _personaRepo.UpdateAsync(persona, request.SituacionesTerapeuticas);
-            return DTOMapper.PersonaToDTO(persona);
+            var personaActualizada = await _personaRepo.UpdateAsync(persona, request.SituacionesTerapeuticas);
+            if (personaActualizada)
+            {
+                return DTOMapper.PersonaToDTO(persona);
+            }
+            else
+            {
+                throw new Exception("Error al actualizar la persona");
+            }
         }
 
     }
