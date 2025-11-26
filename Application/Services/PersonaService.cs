@@ -48,7 +48,8 @@ namespace Application.Services
                     Altura = d.Altura,
                     Piso = d.Piso,
                     Departamento = d.Departamento,
-                    ProvinciaCiudad = d.ProvinciaCiudad
+                    ProvinciaCiudad = d.ProvinciaCiudad,
+                    CodigoPostal = d.CodigoPostal
                 }).ToList() ?? new List<Direccion>(),
                 Documentacion = new Documentacion
                 {
@@ -103,7 +104,8 @@ namespace Application.Services
                 Altura = d.Altura,
                 Piso = d.Piso,
                 Departamento = d.Departamento,
-                ProvinciaCiudad = d.ProvinciaCiudad
+                ProvinciaCiudad = d.ProvinciaCiudad,
+                CodigoPostal = d.CodigoPostal
             }).ToList() ?? new List<Direccion>();
             persona.Documentacion = new Documentacion
             {
