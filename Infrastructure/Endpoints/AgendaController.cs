@@ -95,7 +95,8 @@ public class AgendaController : ControllerBase
                         horaInicio = g.Key.inicio,
                         horaFin = g.Key.fin,
                         duracionConsulta = (int?)g.Key.dur,
-                        especialidadId = (int?)g.Key.esp
+                        especialidadId = (int?)g.Key.esp,
+                        prestadorId = profesionalId
                     })
                     .ToList();
 
@@ -184,7 +185,8 @@ public class AgendaController : ControllerBase
                             horaInicio = g.Key.inicio,
                             horaFin = g.Key.fin,
                             duracionConsulta = (int?)g.Key.dur,
-                            especialidadId = (int?)g.Key.esp
+                            especialidadId = (int?)g.Key.esp,
+                            prestadorId = profesional.Id
                         })
                         .ToList();
 
@@ -274,7 +276,8 @@ public class AgendaController : ControllerBase
                         horaInicio = g.Key.inicio,
                         horaFin = g.Key.fin,
                         duracionConsulta = (int?)g.Key.dur,
-                        especialidadId = (int?)g.Key.esp
+                        especialidadId = (int?)g.Key.esp,
+                        prestadorId = profesionalId
                     })
                     .ToList();
 
@@ -389,7 +392,8 @@ public class AgendaController : ControllerBase
 						horaInicio = g.Key.inicio,
 						horaFin = g.Key.fin,
 						duracionConsulta = (int?)g.Key.dur,
-						especialidadId = (int?)g.Key.esp
+						especialidadId = (int?)g.Key.esp,
+						prestadorId = profesionalId
 					})
 					.ToList();
 
@@ -537,7 +541,8 @@ public class AgendaController : ControllerBase
 						horaInicio = g.Key.inicio,
 						horaFin = g.Key.fin,
 						duracionConsulta = (int?)g.Key.dur,
-						especialidadId = (int?)g.Key.esp
+						especialidadId = (int?)g.Key.esp,
+						prestadorId = profesionalId
 					})
 					.ToList();
 
