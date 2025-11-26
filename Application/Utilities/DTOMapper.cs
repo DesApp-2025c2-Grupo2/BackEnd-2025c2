@@ -67,13 +67,12 @@ public static class DTOMapper
             SituacionesTerapeuticas = new HistorialTerapeuticoResponse()
         };
         persona.SituacionesTerapeuticas?.ForEach(s =>
-            dto.SituacionesTerapeuticas.Add(new RegistroTerapeuticoResponse
-            {
-                id = s.Id,
-                nombre = s.SituacionTerapeutica.Nombre,
-                fechaFin = s.FechaFin
-            })
-        );
+        dto.SituacionesTerapeuticas.Add(new RegistroTerapeuticoResponse
+        {
+            id = s.SituacionTerapeutica?.Id ?? 0, // or another default value
+            nombre = s.SituacionTerapeutica?.Nombre,
+            fechaFin = s.FechaFin
+        }));
         return dto;
     }
 
