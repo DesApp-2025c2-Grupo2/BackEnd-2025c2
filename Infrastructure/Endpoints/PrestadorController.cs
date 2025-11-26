@@ -3,7 +3,9 @@ using Application.Contracts.DTOs.Request;
 using Application.Contracts.DTOs.Response;
 using Application.Utilities;
 using Application.Contracts.Interfaces;
+using Infrastructure.Persistence.Configurations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Endpoints;
 
@@ -20,29 +22,17 @@ public class PrestadorController : ControllerBase
 		this.prestadorService = prestadorService;
 	}
 	[HttpPost]
-	public async Task<IActionResult> CreateAsync([FromBody] PrestadorRequest request)
+	public async Task<IActionResult> CreateAsync([FromBody] PrestadorResponse request)
 	{
 		var result = await prestadorService.CreateAsync(request);
-		return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
+		return Ok(result);
 	}
 
 	[HttpPut("{id}")]
-	public async Task<IActionResult> UpdateAsync([FromRoute] int id, [FromBody] PrestadorRequest request)
+	public async Task<IActionResult> UpdateAsync([FromRoute] int id, [FromBody] PrestadorResponse request)
 	{
 		var result = await prestadorService.UpdateAsync(id, request);
-		var response = new
-		{
-			id = result.Id,
-			nombreCompleto = result.NombreCompleto,
-			rol = result.Rol,
-			activo = result.Activo,
-			especialidadesIds = result.Especialidades ?? new List<int>(),
-			telefonos = result.Telefonos?.Select(t => t.Numero).Where(n => !string.IsNullOrWhiteSpace(n)).ToList() ?? new List<string>(),
-			emails = result.Emails?.Select(e => e.Correo).Where(c => !string.IsNullOrWhiteSpace(c)).ToList() ?? new List<string>(),
-			direcciones = result.Direcciones?.Select(d => string.IsNullOrWhiteSpace(d.Altura) || d.Altura == "S/N" ? d.Calle : $"{d.Calle} {d.Altura}").Where(s => !string.IsNullOrWhiteSpace(s)).ToList() ?? new List<string>(),
-			centroMedico = result.CentroMedico
-		};
-		return Ok(response);
+		return Ok(result);
 	}
 
 
@@ -76,5 +66,28 @@ public class PrestadorController : ControllerBase
 	{
 		var result = await prestadorService.GetByIdAsync(id);
 		return Ok(result);
+	}
+
+	// Endpoint ADMIN para borrar todos los prestadores y sus datos asociados
+	[HttpDelete("admin/clear-prestadores")]
+	public async Task<IActionResult> ClearPrestadoresAsync([FromServices] ProjectContext db)
+	{
+		// Hijos directos de agendas/horarios
+		await db.HorariosAtencion.ExecuteDeleteAsync();
+		await db.Agendas.ExecuteDeleteAsync();
+
+		// Tabla intermedia muchos-a-muchos Prestador-Especialidad
+		await db.Database.ExecuteSqlRawAsync("DELETE FROM ESPECIALIZACIONES");
+
+		// Datos de contacto/documentación asociados a prestadores (no a personas)
+		await db.Telefonos.Where(t => t.PrestadorId != null).ExecuteDeleteAsync();
+		await db.Emails.Where(e => e.PrestadorId != null).ExecuteDeleteAsync();
+		await db.Documentaciones.Where(d => d.PrestadorId != null).ExecuteDeleteAsync();
+		await db.Direcciones.Where(d => d.PrestadorId != null).ExecuteDeleteAsync();
+
+		// Finalmente, todos los prestadores
+		await db.Prestadores.ExecuteDeleteAsync();
+
+		return Ok(new { message = "Prestadores y datos asociados borrados correctamente." });
 	}
 }
