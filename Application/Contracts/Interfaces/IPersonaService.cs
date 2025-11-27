@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.DTOs.Request;
 using Application.Contracts.DTOs.Response;
+using Domain.Entities;
 
 namespace Application.Contracts.Interfaces
 {
@@ -8,6 +9,6 @@ namespace Application.Contracts.Interfaces
         Task<PersonaResponse> AddPersonAsync(PersonaRequest request);
         Task<PersonaResponse> UpdatePersonAsync(PersonaRequest request);
         Task<PersonaResponse> GetByIdAsync(int id);
-        Task<bool> ToggleStatusAsync(int id, DateTime? fecha);
+        Task<bool> ToggleStatusAsync(int id, bool activo, DateTime? fecha);
     }
 }

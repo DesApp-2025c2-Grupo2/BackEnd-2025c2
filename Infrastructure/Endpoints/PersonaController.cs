@@ -83,12 +83,12 @@ namespace API.Controllers
         }
 
         [HttpPatch("toggleStatus/{id}")]
-        public async Task<IActionResult> ToggleStatus([Required] int id, [FromQuery] DateTime? fecha)
+        public async Task<IActionResult> ToggleStatus([Required] int id, [FromQuery] bool activo, [FromQuery] DateTime? fecha)
         {
             ActionResult result;
             try
             {
-                var toggled = await _personaService.ToggleStatusAsync(id, fecha);
+                var toggled = await _personaService.ToggleStatusAsync(id, activo, fecha);
                 result = Ok(toggled);
             }
             catch (Exception ex)

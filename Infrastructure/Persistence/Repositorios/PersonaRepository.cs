@@ -50,33 +50,34 @@ namespace Infrastructure.Persistence.Repositorios
             return persona;
         }
 
-        public async Task<bool> ToggleStatusAsync(int id, DateTime? fecha)
+        public async Task<bool> ToggleStatusAsync(int personaId, bool activo, DateTime? fecha)
         {
-            bool response = false;
-            var persona = await _context.Personas.FirstOrDefaultAsync(p => p.Id == id);
-            if (persona == null) throw new KeyNotFoundException("Persona no encontrada.");
-            // Verificamos el estado del afiliado asociado
-            var afiliado = await _context.Afiliados.Where(a => a.Id == persona.AfiliadoId).FirstOrDefaultAsync();
-            if (afiliado.Baja == null || afiliado.Baja.Value.Date > DateTime.Now.Date)
+            var persona = await _context.Personas
+                .Include(p => p.Afiliado)
+                .FirstOrDefaultAsync(p => p.Id == personaId);
+
+            if (persona == null)
+                throw new KeyNotFoundException("Familiar no encontrado.");
+
+            // Si el afiliado está dado de baja, NO permitir cambios
+            if (persona.Afiliado != null && persona.Afiliado.Baja != null)
+                throw new InvalidOperationException("No se puede modificar familiares de un afiliado dado de baja.");
+
+            if (activo)
             {
-                if (persona.Baja == null)
-                {
-                    persona.Baja = fecha ?? DateTime.Now.Date;
-                }
-                else
-                {
-                    persona.Baja = null;
-                    persona.Alta = fecha ?? DateTime.Now.Date;
-                }
-                await _context.SaveChangesAsync();
-                response = true;
+                // ACTIVAR
+                persona.Alta = fecha ?? DateTime.Now;
             }
             else
             {
-                throw new InvalidOperationException("No se puede modificar el estado de una persona cuyo afiliado está dado de baja.");
+                // DAR DE BAJA
+                persona.Baja = fecha;
+                // Si es baja programada, mantenemos el alta actual
+                // Si es baja inmediata, no tocamos Alta
             }
 
-                return response;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> UpdateAsync(Persona persona, Dictionary<int, DateTime?> situacionesTerapeuticas)

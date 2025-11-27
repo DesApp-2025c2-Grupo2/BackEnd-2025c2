@@ -12,35 +12,6 @@ public class AfiliadoRepository : IAfiliadoRepository
     {
         _context = context;
     }
-
-    // REMOVED //
-    //public async Task<Afiliado> GetByIdAsync(int id)
-    //{
-    //    return await _context.Afiliados
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Telefonos)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Emails)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Documentacion)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Direcciones)
-    //        .FirstOrDefaultAsync(a => a.Id == id);
-    //}
-    //public async Task<Afiliado> GetByNumeroAsync(int numeroAfiliado)
-    //{
-    //    return await _context.Afiliados
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Telefonos)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Emails)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Documentacion)
-    //        .Include(a => a.Integrantes)
-    //            .ThenInclude(p => p.Direcciones)
-    //        .FirstOrDefaultAsync(a => a.NumeroAfiliado == numeroAfiliado);
-    //}
-
     public async Task<List<Afiliado>> GetAllAsync()
     {
         return await _context.Afiliados
@@ -56,18 +27,7 @@ public class AfiliadoRepository : IAfiliadoRepository
                 .ThenInclude(p => p.SituacionesTerapeuticas.Where(st => st.FechaFin == null || st.FechaFin > DateTime.Now.Date)).ThenInclude(st => st.SituacionTerapeutica)
             .ToListAsync();
     }
-
-    // OLD VERSION //
-    //public async Task AddAsync(Afiliado afiliado)
-    //{
-    //    await _context.Afiliados.AddAsync(afiliado);
-    //}
     
-    /// <summary>
-    /// Agrega un nuevo afiliado junto con su titular y asigna un número de afiliado único.
-    /// </summary>
-    /// <param name="afiliado"></param>
-    /// <returns></returns>
     public async Task AddAsync(Afiliado afiliado, Dictionary<int,DateTime?> situacionesTerapeuticasTitular)
     {
         // extraemos el integrante 1 de la lista
@@ -113,14 +73,6 @@ public class AfiliadoRepository : IAfiliadoRepository
         {
             throw new KeyNotFoundException($"Afiliado no encontrado.");
         }
-
-
-        // DEBUG: Ver qué valor está recibiendo realmente
-        Console.WriteLine($"DEBUG: afiliadoID={afiliadoID}, activo={activo}, fecha={fecha}, fecha.HasValue={fecha.HasValue}");
-        if (fecha.HasValue)
-        {
-            Console.WriteLine($"DEBUG: fecha.Value={fecha.Value}");
-        }
         // Para BAJA: si activo es false y fecha es null, establecer baja como null
         if (!activo && fecha == null)
         {
@@ -137,8 +89,11 @@ public class AfiliadoRepository : IAfiliadoRepository
 
             foreach (var integrante in afiliado.Integrantes)
             {
-                integrante.Baja = activo ? integrante.Baja : fecha;
-                integrante.Alta = activo ? (fecha ?? integrante.Alta) : integrante.Alta;
+                if (integrante.Parentesco == 0)
+                {
+                    integrante.Baja = activo ? integrante.Baja : fecha;
+                    integrante.Alta = activo ? (fecha ?? integrante.Alta) : integrante.Alta;
+                }
             }
         }
 
