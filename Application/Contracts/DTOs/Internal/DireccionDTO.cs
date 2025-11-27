@@ -8,5 +8,6 @@
         public string Piso { get; set; } = string.Empty;
         public string Departamento { get; set; } = string.Empty;
         public string ProvinciaCiudad { get; set; } = string.Empty;
+        public int CodigoPostal { get; set; } = 0;
     }
 }

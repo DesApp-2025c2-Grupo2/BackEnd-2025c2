@@ -56,7 +56,8 @@ public static class DTOMapper
                 Altura = d.Altura,
                 Piso = d.Piso,
                 Departamento = d.Departamento,
-                ProvinciaCiudad = d.ProvinciaCiudad
+                ProvinciaCiudad = d.ProvinciaCiudad,
+                CodigoPostal = d.CodigoPostal
             }).ToList(),
             Documentacion = new DocumentacionDTO
             {

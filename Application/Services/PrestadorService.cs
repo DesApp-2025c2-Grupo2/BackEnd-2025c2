@@ -63,7 +63,7 @@ public class PrestadorService : IPrestadorService
                 Piso = d.Piso,
                 Departamento = d.Departamento,
                 ProvinciaCiudad = string.IsNullOrWhiteSpace(d.ProvinciaCiudad) ? "S/D" : d.ProvinciaCiudad,
-                CodigoPostal = 0
+                CodigoPostal = d.CodigoPostal
             })
             .ToList() ?? new();
 
@@ -167,6 +167,7 @@ public class PrestadorService : IPrestadorService
                 existente.Piso = dDto.Piso;
                 existente.Departamento = dDto.Departamento;
                 existente.ProvinciaCiudad = string.IsNullOrWhiteSpace(dDto.ProvinciaCiudad) ? "S/D" : dDto.ProvinciaCiudad;
+                existente.CodigoPostal = dDto.CodigoPostal;
                 nuevasDirecciones.Add(existente);
             }
             else if (!string.IsNullOrWhiteSpace(dDto.Calle))
@@ -178,7 +179,7 @@ public class PrestadorService : IPrestadorService
                     Piso = dDto.Piso,
                     Departamento = dDto.Departamento,
                     ProvinciaCiudad = string.IsNullOrWhiteSpace(dDto.ProvinciaCiudad) ? "S/D" : dDto.ProvinciaCiudad,
-                    CodigoPostal = 0,
+                    CodigoPostal = dDto.CodigoPostal,
                     PrestadorId = prestador.Id
                 });
             }
@@ -410,7 +411,8 @@ public class PrestadorService : IPrestadorService
                 Altura = d.Altura,
                 Piso = d.Piso,
                 Departamento = d.Departamento,
-                ProvinciaCiudad = d.ProvinciaCiudad
+                ProvinciaCiudad = d.ProvinciaCiudad,
+                CodigoPostal = d.CodigoPostal
             }).ToList() ?? new()
         };
     }
