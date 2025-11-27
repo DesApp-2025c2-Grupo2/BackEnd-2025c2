@@ -289,15 +289,9 @@ public class AgendaController : ControllerBase
                 var direccionTexto = grupo.Key;
                 if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
                 {
-                    prestador.Direcciones.Add(new Domain.Entities.Direccion
-                    {
-                        Calle = direccionTexto,
-                        Altura = "S/N",
-                        ProvinciaCiudad = "S/D"
-                    });
-                    await prestadorRepository.UpdateAsync(prestador);
-                    direccionesMap = BuildDireccionesMap(prestador.Direcciones);
-                    lugarId = direccionesMap[direccionTexto];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lugarId = 0;
                 }
 
                 var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -414,10 +408,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = BuildDireccionesMap(prestador.Direcciones);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -566,10 +559,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = BuildDireccionesMap(prestador.Direcciones);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -642,10 +634,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = BuildDireccionesMap(prestador.Direcciones);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
