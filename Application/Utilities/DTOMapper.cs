@@ -57,7 +57,7 @@ public static class DTOMapper
                 Piso = d.Piso,
                 Departamento = d.Departamento,
                 ProvinciaCiudad = d.ProvinciaCiudad,
-                CodigoPostal = d.CodigoPostal
+                CodigoPostal = d.CodigoPostal,
             }).ToList(),
             Documentacion = new DocumentacionDTO
             {
@@ -68,13 +68,12 @@ public static class DTOMapper
             SituacionesTerapeuticas = new HistorialTerapeuticoResponse()
         };
         persona.SituacionesTerapeuticas?.ForEach(s =>
-            dto.SituacionesTerapeuticas.Add(new RegistroTerapeuticoResponse
-            {
-                id = s.Id,
-                nombre = s.SituacionTerapeutica.Nombre,
-                fechaFin = s.FechaFin
-            })
-        );
+        dto.SituacionesTerapeuticas.Add(new RegistroTerapeuticoResponse
+        {
+            id = s.SituacionTerapeutica?.Id ?? 0, // or another default value
+            nombre = s.SituacionTerapeutica?.Nombre,
+            fechaFin = s.FechaFin
+        }));
         return dto;
     }
 
