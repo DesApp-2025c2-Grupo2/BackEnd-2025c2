@@ -20,6 +20,8 @@ public class HorarioEdicionDTO
     public int? Id { get; set; }
     public int DiaSemana { get; set; } // 0=Domingo ... 6=Sabado (legacy)
     public List<int>? DiasDeLaSemana { get; set; } // preferido: lista de días
+    // Si el prestador es un Centro Médico, este es el profesional al que se le asigna el horario
+    public int? ProfesionalId { get; set; }
     public string HoraInicio { get; set; } // HH:mm
     public string HoraFin { get; set; }    // HH:mm
     public List<int> Especialidades { get; set; } = new();

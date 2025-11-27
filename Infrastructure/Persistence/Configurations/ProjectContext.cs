@@ -34,6 +34,13 @@ public class ProjectContext : DbContext
         modelBuilder.Entity<HorarioAtencion>(entity => entity.ToTable("HORARIOS_ATENCION"));
         modelBuilder.Entity<Agenda>(entity => entity.ToTable("AGENDAS"));
         modelBuilder.Entity<SituacionTerapeutica>(entity => entity.ToTable("SITUACIONES_TERAPEUTICAS"));
+
+        // Relación self-reference: Centro médico -> Profesionales
+        modelBuilder.Entity<Prestador>()
+            .HasMany(p => p.Profesionales)
+            .WithOne(p => p.Centro)
+            .HasForeignKey(p => p.CentroId)
+            .OnDelete(DeleteBehavior.Restrict);
         // Forzar que todas las tablas y columnas sean en mayúsculas
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

@@ -17,35 +17,59 @@ public class PrestadorService : IPrestadorService
         this.prestadorRepo = prestadorRepo;
     }
 
-    public async Task<PrestadorResponse> CreateAsync(PrestadorRequest request)
+    public async Task<PrestadorResponse> CreateAsync(PrestadorResponse request)
     {
         var prestador = new Prestador
         {
             NombreCompleto = request.NombreCompleto,
             Rol = (RolMedico)request.Rol,
             CentroMedico = request.CentroMedico,
+            CentroId = request.CentroId,
             Alta = DateTime.UtcNow
         };
 
-        if (!string.IsNullOrWhiteSpace(request.Documentacion))
+        // Documentación
+        if (request.Documentacion != null && !string.IsNullOrWhiteSpace(request.Documentacion.numero))
         {
             prestador.Documentaciones = new List<Documentacion>
             {
                 new Documentacion
                 {
-                    TipoDocumento = TipoDocumento.CUIT,
-                    Numero = request.Documentacion
+                    TipoDocumento = (TipoDocumento)request.Documentacion.tipoDocumento,
+                    Numero = request.Documentacion.numero
                 }
             };
         }
 
-        prestador.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t }).ToList() ?? new();
-        prestador.Emails = request.Emails?.Select(e => new Email { Correo = e }).ToList() ?? new();
-        prestador.Direcciones = request.Direcciones?.Select(d => new Direccion { Calle = d, Altura = "S/N", ProvinciaCiudad = "S/D" }).ToList() ?? new();
+        // Teléfonos
+        prestador.Telefonos = request.Telefonos?
+            .Where(t => !string.IsNullOrWhiteSpace(t.Numero))
+            .Select(t => new Telefono { Numero = t.Numero })
+            .ToList() ?? new();
 
-        if (request.EspecialidadesIds != null && request.EspecialidadesIds.Count > 0)
+        // Emails
+        prestador.Emails = request.Emails?
+            .Where(e => !string.IsNullOrWhiteSpace(e.Correo))
+            .Select(e => new Email { Correo = e.Correo })
+            .ToList() ?? new();
+
+        // Direcciones
+        prestador.Direcciones = request.Direcciones?
+            .Where(d => !string.IsNullOrWhiteSpace(d.Calle))
+            .Select(d => new Direccion
+            {
+                Calle = d.Calle,
+                Altura = string.IsNullOrWhiteSpace(d.Altura) ? "S/N" : d.Altura,
+                Piso = d.Piso,
+                Departamento = d.Departamento,
+                ProvinciaCiudad = string.IsNullOrWhiteSpace(d.ProvinciaCiudad) ? "S/D" : d.ProvinciaCiudad,
+                CodigoPostal = d.CodigoPostal
+            })
+            .ToList() ?? new();
+
+        if (request.Especialidades != null && request.Especialidades.Count > 0)
         {
-            var especialidades = await prestadorRepo.GetEspecialidadesByIdsAsync(request.EspecialidadesIds);
+            var especialidades = await prestadorRepo.GetEspecialidadesByIdsAsync(request.Especialidades);
             prestador.Especialidades = especialidades;
         }
 
@@ -69,46 +93,111 @@ public class PrestadorService : IPrestadorService
         return MapPrestadorToResponse(prestador);
     }
 
-    public async Task<PrestadorResponse> UpdateAsync(int id, PrestadorRequest request)
+    public async Task<PrestadorResponse> UpdateAsync(int id, PrestadorResponse request)
     {
         var prestador = await prestadorRepo.GetByIdWithDetailsAsync(id) ?? throw new Exception("Prestador no encontrado");
 
         prestador.NombreCompleto = request.NombreCompleto;
         prestador.Rol = (RolMedico)request.Rol;
         prestador.CentroMedico = request.CentroMedico;
+        prestador.CentroId = request.CentroId;
 
-        // Documentación: sólo actualizar/agregar si viene en el request. No borrar lo existente.
-        if (!string.IsNullOrWhiteSpace(request.Documentacion))
+        // Documentación: actualizar/agregar si viene en el request. No borrar si no viene.
+        if (request.Documentacion != null && !string.IsNullOrWhiteSpace(request.Documentacion.numero))
         {
             var docCuit = prestador.Documentaciones?.FirstOrDefault(d => d.TipoDocumento == TipoDocumento.CUIT);
             if (docCuit == null)
             {
                 if (prestador.Documentaciones == null) prestador.Documentaciones = new List<Documentacion>();
-                prestador.Documentaciones.Add(new Documentacion { TipoDocumento = TipoDocumento.CUIT, Numero = request.Documentacion });
+                prestador.Documentaciones.Add(new Documentacion
+                {
+                    TipoDocumento = (TipoDocumento)request.Documentacion.tipoDocumento,
+                    Numero = request.Documentacion.numero
+                });
             }
             else
             {
-                docCuit.Numero = request.Documentacion;
+                docCuit.Numero = request.Documentacion.numero;
             }
         }
 
-        // Teléfonos: REEMPLAZAR completamente con lo enviado
-        prestador.Telefonos = request.Telefonos?.Where(n => !string.IsNullOrWhiteSpace(n))
-            .Select(n => new Telefono { Numero = n })
-            .ToList() ?? new List<Telefono>();
+        // Teléfonos: sincronizar con IDs
+        var nuevosTelefonos = new List<Telefono>();
+        var telefonosExistentes = prestador.Telefonos?.ToDictionary(t => t.Id) ?? new Dictionary<int, Telefono>();
+        foreach (var tDto in request.Telefonos ?? new List<TelefonoDTO>())
+        {
+            if (tDto.Id > 0 && telefonosExistentes.TryGetValue(tDto.Id, out var existente))
+            {
+                existente.Numero = tDto.Numero;
+                nuevosTelefonos.Add(existente);
+            }
+            else if (!string.IsNullOrWhiteSpace(tDto.Numero))
+            {
+                nuevosTelefonos.Add(new Telefono { Numero = tDto.Numero, PrestadorId = prestador.Id });
+            }
+        }
+        prestador.Telefonos = nuevosTelefonos;
 
-        // Emails: REEMPLAZAR completamente con lo enviado
-        prestador.Emails = request.Emails?.Where(c => !string.IsNullOrWhiteSpace(c))
-            .Select(c => new Email { Correo = c })
-            .ToList() ?? new List<Email>();
+        // Emails: sincronizar con IDs
+        var nuevosEmails = new List<Email>();
+        var emailsExistentes = prestador.Emails?.ToDictionary(e => e.Id) ?? new Dictionary<int, Email>();
+        foreach (var eDto in request.Emails ?? new List<EmailDTO>())
+        {
+            if (eDto.Id > 0 && emailsExistentes.TryGetValue(eDto.Id, out var existente))
+            {
+                existente.Correo = eDto.Correo;
+                nuevosEmails.Add(existente);
+            }
+            else if (!string.IsNullOrWhiteSpace(eDto.Correo))
+            {
+                nuevosEmails.Add(new Email { Correo = eDto.Correo, PrestadorId = prestador.Id });
+            }
+        }
+        prestador.Emails = nuevosEmails;
 
-        // Direcciones: REEMPLAZAR completamente con lo enviado
-        prestador.Direcciones = request.Direcciones?.Where(d => !string.IsNullOrWhiteSpace(d))
-            .Select(d => new Direccion { Calle = d, Altura = "S/N", ProvinciaCiudad = "S/D" })
-            .ToList() ?? new List<Direccion>();
+        // Direcciones: sincronizar con IDs
+        var nuevasDirecciones = new List<Direccion>();
+        var direccionesExistentes = prestador.Direcciones?.ToDictionary(d => d.Id) ?? new Dictionary<int, Direccion>();
+        foreach (var dDto in request.Direcciones ?? new List<DireccionDTO>())
+        {
+            if (dDto.Id.HasValue && dDto.Id.Value > 0 && direccionesExistentes.TryGetValue(dDto.Id.Value, out var existente))
+            {
+                // Guardar el texto anterior para poder propagar cambios a las agendas
+                var oldCalle = (existente.Calle ?? string.Empty).Trim();
+
+                existente.Calle = dDto.Calle;
+                existente.Altura = string.IsNullOrWhiteSpace(dDto.Altura) ? "S/N" : dDto.Altura;
+                existente.Piso = dDto.Piso;
+                existente.Departamento = dDto.Departamento;
+                existente.ProvinciaCiudad = string.IsNullOrWhiteSpace(dDto.ProvinciaCiudad) ? "S/D" : dDto.ProvinciaCiudad;
+                existente.CodigoPostal = dDto.CodigoPostal;
+                nuevasDirecciones.Add(existente);
+
+                // Si cambió el nombre de la calle, actualizar también las Agendas que usaban el texto viejo
+                var newCalle = (dDto.Calle ?? string.Empty).Trim();
+                if (!string.Equals(oldCalle, newCalle, StringComparison.OrdinalIgnoreCase))
+                {
+                    await prestadorRepo.UpdateDireccionTextoForProfesionalAsync(prestador.Id, oldCalle, newCalle);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(dDto.Calle))
+            {
+                nuevasDirecciones.Add(new Direccion
+                {
+                    Calle = dDto.Calle,
+                    Altura = string.IsNullOrWhiteSpace(dDto.Altura) ? "S/N" : dDto.Altura,
+                    Piso = dDto.Piso,
+                    Departamento = dDto.Departamento,
+                    ProvinciaCiudad = string.IsNullOrWhiteSpace(dDto.ProvinciaCiudad) ? "S/D" : dDto.ProvinciaCiudad,
+                    CodigoPostal = dDto.CodigoPostal,
+                    PrestadorId = prestador.Id
+                });
+            }
+        }
+        prestador.Direcciones = nuevasDirecciones;
 
         // Especialidades: REEMPLAZAR completamente con lo enviado
-        var nuevasEspecialidades = await prestadorRepo.GetEspecialidadesByIdsAsync(request.EspecialidadesIds ?? new List<int>());
+        var nuevasEspecialidades = await prestadorRepo.GetEspecialidadesByIdsAsync(request.Especialidades ?? new List<int>());
         prestador.Especialidades = nuevasEspecialidades;
 
         await prestadorRepo.UpdateAsync(prestador);
@@ -121,6 +210,7 @@ public class PrestadorService : IPrestadorService
     public async Task<PrestadorResponse> UpdateHorariosAsync(int id, PrestadorHorariosRequest request, string strategy = "merge")
     {
         var prestador = await prestadorRepo.GetByIdWithDetailsAsync(id) ?? throw new Exception("Prestador no encontrado");
+        var esCentro = prestador.Rol == RolMedico.CentroMedico;
 
         // Eliminar explícitos por removeIds
         if (request.RemoveIds != null && request.RemoveIds.Count > 0)
@@ -132,22 +222,14 @@ public class PrestadorService : IPrestadorService
         {
             var sourceHorarios = (dir.HorariosAtencion != null && dir.HorariosAtencion.Any()) ? dir.HorariosAtencion : dir.Horarios;
 
-            // Asegurar lugar (Dirección) estable: si no existe y viene sin Id, crear en Prestador.Direcciones
-            var direccionTexto = (dir.Direccion ?? string.Empty).Trim();
+            // Obtener siempre la dirección desde el lugar existente del prestador (no crear lugares al vuelo)
             if (dir.Id == null || dir.Id <= 0)
-            {
-                var existeLugar = prestador.Direcciones?.Any(d => (d.Calle ?? string.Empty).Trim() == direccionTexto) == true;
-                if (!existeLugar && !string.IsNullOrWhiteSpace(direccionTexto))
-                {
-                    prestador.Direcciones.Add(new Direccion
-                    {
-                        Calle = direccionTexto,
-                        Altura = "S/N",
-                        ProvinciaCiudad = "S/D"
-                    });
-                    await prestadorRepo.UpdateAsync(prestador);
-                }
-            }
+                throw new Exception("Debe especificar un lugarId (Id de dirección) válido para cada grupo de horarios.");
+
+            var direccionEntidad = prestador.Direcciones?.FirstOrDefault(d => d.Id == dir.Id.Value)
+                                   ?? throw new Exception($"Lugar con Id {dir.Id.Value} no encontrado para el prestador.");
+
+            var direccionTexto = (direccionEntidad.Calle ?? string.Empty).Trim();
 
             // strategy=replace => borrar horarios actuales de todas las agendas en esa direccion para el profesional
             if (!string.IsNullOrWhiteSpace(strategy) && strategy.Equals("replace", StringComparison.OrdinalIgnoreCase))
@@ -166,6 +248,13 @@ public class PrestadorService : IPrestadorService
                     continue;
                 }
 
+                // Determinar el profesional al que se le asigna el horario:
+                // - Si el prestador es un Centro Médico => usar h.ProfesionalId (obligatorio)
+                // - Si es un profesional independiente => usar el propio prestador.Id
+                var profesionalId = esCentro
+                    ? h.ProfesionalId ?? throw new Exception("Debe especificar ProfesionalId para horarios de un centro médico.")
+                    : prestador.Id;
+
                 var dias = (h.DiasDeLaSemana != null && h.DiasDeLaSemana.Any()) ? h.DiasDeLaSemana : new List<int> { h.DiaSemana };
                 if (dias.Count == 0) continue;
 
@@ -180,12 +269,12 @@ public class PrestadorService : IPrestadorService
                 foreach (var especialidadId in especialidades)
                 {
                     // Asegurar agenda por profesional+especialidad+direccion
-                    var agenda = await prestadorRepo.GetAgendaAsync(prestador.Id, especialidadId, direccionTexto);
+                    var agenda = await prestadorRepo.GetAgendaAsync(profesionalId, especialidadId, direccionTexto);
                     if (agenda == null)
                     {
                         agenda = new Agenda
                         {
-                            ProfesionalId = prestador.Id,
+                            ProfesionalId = profesionalId,
                             EspecialidadId = especialidadId,
                             Direccion = direccionTexto,
                             DuracionConsulta = duracion,
@@ -314,6 +403,7 @@ public class PrestadorService : IPrestadorService
             NombreCompleto = p.NombreCompleto,
             Rol = (int)p.Rol,
             CentroMedico = p.CentroMedico,
+            ProfesionalesIds = p.Profesionales?.Select(pr => pr.Id).ToList() ?? new List<int>(),
             Activo = p.Baja == null || (p.Baja.HasValue && p.Baja.Value.Date > DateTime.Now.Date),
             Especialidades = p.Especialidades?.Select(e => e.Id).ToList() ?? new(),
             Documentacion = p.Documentaciones != null && p.Documentaciones.Any() ? new DocumentacionDTO

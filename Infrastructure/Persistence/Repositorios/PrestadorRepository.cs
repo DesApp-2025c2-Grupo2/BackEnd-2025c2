@@ -21,6 +21,7 @@ public class PrestadorRepository : IPrestadorRepository
     public async Task<IEnumerable<Prestador>> GetAllAsync()
     {
         return await context.Prestadores
+            .Include(p => p.Profesionales)
             .Include(p => p.Telefonos)
             .Include(p => p.Emails)
             .Include(p => p.Documentaciones)
@@ -37,6 +38,7 @@ public class PrestadorRepository : IPrestadorRepository
     public async Task<Prestador?> GetByIdWithDetailsAsync(int id)
     {
         return await context.Prestadores
+            .Include(p => p.Profesionales)
             .Include(p => p.Telefonos)
             .Include(p => p.Emails)
             .Include(p => p.Documentaciones)
@@ -44,6 +46,8 @@ public class PrestadorRepository : IPrestadorRepository
             .Include(p => p.Especialidades)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
+
+    
 
     public async Task UpdateAsync(Prestador prestador)
     {
@@ -149,6 +153,20 @@ public class PrestadorRepository : IPrestadorRepository
         return await context.Agendas.Where(a => a.ProfesionalId == profesionalId).ToListAsync();
     }
 
+    public async Task<List<Agenda>> GetAgendasByProfesionalesAsync(IEnumerable<int> profesionalIds)
+    {
+        var ids = profesionalIds?.Distinct().ToList() ?? new List<int>();
+        if (ids.Count == 0) return new List<Agenda>();
+        return await context.Agendas.Where(a => ids.Contains(a.ProfesionalId)).ToListAsync();
+    }
+
+    public async Task<List<HorarioAtencion>> GetHorariosByAgendasAsync(IEnumerable<int> agendaIds)
+    {
+        var ids = agendaIds?.Distinct().ToList() ?? new List<int>();
+        if (ids.Count == 0) return new List<HorarioAtencion>();
+        return await context.HorariosAtencion.Where(h => ids.Contains(h.AgendaId)).ToListAsync();
+    }
+
     public async Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion)
     {
         return await context.Agendas
@@ -162,6 +180,26 @@ public class PrestadorRepository : IPrestadorRepository
         var existentes = await context.HorariosAtencion.Where(h => agendaIds.Contains(h.AgendaId)).ToListAsync();
         if (existentes.Count == 0) return;
         context.HorariosAtencion.RemoveRange(existentes);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateDireccionTextoForProfesionalAsync(int profesionalId, string oldDireccion, string newDireccion)
+    {
+        var oldTxt = (oldDireccion ?? string.Empty).Trim();
+        var newTxt = (newDireccion ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(oldTxt) || oldTxt == newTxt) return;
+
+        var agendas = await context.Agendas
+            .Where(a => a.ProfesionalId == profesionalId && a.Direccion == oldTxt)
+            .ToListAsync();
+
+        if (agendas.Count == 0) return;
+
+        foreach (var agenda in agendas)
+        {
+            agenda.Direccion = newTxt;
+        }
+
         await context.SaveChangesAsync();
     }
 }

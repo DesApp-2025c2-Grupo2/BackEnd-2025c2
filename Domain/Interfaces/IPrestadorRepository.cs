@@ -21,6 +21,8 @@ public interface IPrestadorRepository
     Task<List<HorarioAtencion>> GetHorariosByAgendaAsync(int agendaId);
     Task ReplaceHorariosAsync(int agendaId, List<HorarioAtencion> nuevos);
     Task<List<Agenda>> GetAgendasByProfesionalAsync(int profesionalId);
+    Task<List<Agenda>> GetAgendasByProfesionalesAsync(IEnumerable<int> profesionalIds);
+    Task<List<HorarioAtencion>> GetHorariosByAgendasAsync(IEnumerable<int> agendaIds);
     Task<HorarioAtencion?> GetHorarioByIdAsync(int horarioId);
     Task DeleteHorariosByTramoAsync(int agendaId, TimeSpan inicio, TimeSpan fin);
     Task AddHorariosAsync(List<HorarioAtencion> nuevos);
@@ -31,4 +33,5 @@ public interface IPrestadorRepository
     // Helpers por direccion
     Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion);
     Task DeleteAllHorariosByAgendaIdsAsync(List<int> agendaIds);
+    Task UpdateDireccionTextoForProfesionalAsync(int profesionalId, string oldDireccion, string newDireccion);
 }

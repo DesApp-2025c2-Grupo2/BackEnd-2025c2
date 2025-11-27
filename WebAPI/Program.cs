@@ -22,8 +22,10 @@ builder.Services.AddServices();
 // Inyección de repositorios
 builder.Services.AddRepositories();
 
-// Inyección de endpoints
-builder.Services.AddControllers();
+// Inyección de endpoints (incluyendo controladores definidos en el proyecto Infrastructure)
+builder.Services
+    .AddControllers()
+    .AddApplicationPart(typeof(Infrastructure.Endpoints.AgendaController).Assembly);
 
 // Inyección de logger
 builder.Services.AddSingleton<IProjectLogger, ProjectLogger>();

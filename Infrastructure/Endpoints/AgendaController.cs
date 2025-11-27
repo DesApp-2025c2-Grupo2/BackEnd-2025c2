@@ -6,6 +6,7 @@ using Domain.Enums;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Domain.Entities;
 
 namespace Infrastructure.Endpoints;
 
@@ -23,6 +24,46 @@ public class AgendaController : ControllerBase
         this.prestadorRepository = prestadorRepository;
         this.prestadorService = prestadorService;
     }
+
+    private static Dictionary<string, int> BuildDireccionesMap(IEnumerable<Direccion>? direcciones)
+    {
+        if (direcciones == null) return new Dictionary<string, int>();
+
+        return direcciones
+            .GroupBy(d => (d.Calle ?? string.Empty).Trim())
+            .ToDictionary(g => g.Key, g => g.First().Id);
+    }
+
+    // DTO que el front puede consumir directo: incluye id técnico (lugarId) y detalle de dirección
+    private static object BuildDireccionDto(
+        string direccionTexto,
+        int lugarId,
+        Direccion? direccionEntidad,
+        IEnumerable<object> horariosAtencion)
+    {
+        object? detalleDireccion = null;
+        if (direccionEntidad != null)
+        {
+            detalleDireccion = new
+            {
+                id = direccionEntidad.Id,
+                calle = direccionEntidad.Calle,
+                altura = direccionEntidad.Altura,
+                piso = direccionEntidad.Piso,
+                departamento = direccionEntidad.Departamento,
+                provinciaCiudad = direccionEntidad.ProvinciaCiudad,
+                codigoPostal = direccionEntidad.CodigoPostal
+            };
+        }
+
+        return new
+        {
+            lugarId,
+            detalleDireccion,
+            horariosAtencion
+        };
+    }
+
     [HttpGet("getByProfesional/{profesionalId:int}")]
     public async Task<IActionResult> GetAllByProfesionalAsync([FromRoute] int profesionalId)
     {
@@ -34,10 +75,7 @@ public class AgendaController : ControllerBase
             var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesionalId);
 
             // Consolidar por direccion (texto) y mapear lugarId estable desde Prestador.Direcciones
-            var direccionesMap = prestador.Direcciones?.ToDictionary(
-                d => (d.Calle ?? string.Empty).Trim(),
-                d => d.Id
-            ) ?? new Dictionary<string, int>();
+            var direccionesMap = BuildDireccionesMap(prestador.Direcciones);
 
             var gruposPorDireccion = agendasDb
                 .GroupBy(a => (a.Direccion ?? string.Empty).Trim())
@@ -48,20 +86,10 @@ public class AgendaController : ControllerBase
             {
                 var direccionTexto = grupo.Key;
 
-                // Asegurar lugarId estable para la dirección (crear si no existe aún en Prestador.Direcciones)
+                // Solo mostramos direcciones que existan como lugares propios del profesional.
+                // Los horarios que provienen de centros (sin lugar del profesional) no se exponen aquí.
                 if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
-                {
-                    prestador.Direcciones.Add(new Domain.Entities.Direccion
-                    {
-                        Calle = direccionTexto,
-                        Altura = "S/N",
-                        ProvinciaCiudad = "S/D"
-                    });
-                    await prestadorRepository.UpdateAsync(prestador);
-                    // recargar map
-                    direccionesMap = prestador.Direcciones.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id);
-                    lugarId = direccionesMap[direccionTexto];
-                }
+                    continue;
 
                 // Reunir horarios de todas las agendas en esta dirección
                 var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -87,16 +115,19 @@ public class AgendaController : ControllerBase
                         horaInicio = g.Key.inicio,
                         horaFin = g.Key.fin,
                         duracionConsulta = (int?)g.Key.dur,
-                        especialidadId = (int?)g.Key.esp
+                        especialidadId = (int?)g.Key.esp,
+                        prestadorId = profesionalId
                     })
+                    .Cast<object>()
                     .ToList();
 
-                direcciones.Add(new
+                Direccion? direccionEntidad = null;
+                if (lugarId != 0)
                 {
-                    lugarId,
-                    direccion = direccionTexto,
-                    horariosAtencion = horariosCanonicos
-                });
+                    direccionEntidad = prestador.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+                }
+
+                direcciones.Add(BuildDireccionDto(direccionTexto, lugarId, direccionEntidad, horariosCanonicos));
             }
 
             logger.LogSuccess("Agenda obtenida exitosamente.");
@@ -109,6 +140,127 @@ public class AgendaController : ControllerBase
         catch (Exception ex)
         {
             logger.LogError("Error al obtener la Agenda.", ex);
+            return StatusCode(500, "Error interno del servidor.");
+        }
+    }
+
+    [HttpGet("getByCentro/{centroId:int}")]
+    public async Task<IActionResult> GetAllByCentroAsync([FromRoute] int centroId)
+    {
+        try
+        {
+            var centro = await prestadorRepository.GetByIdWithDetailsAsync(centroId);
+            if (centro == null) return NotFound(new { message = "Centro médico no encontrado" });
+            if (centro.Rol != Domain.Enums.RolMedico.CentroMedico)
+                return BadRequest(new { message = "El prestador indicado no es un centro médico" });
+
+            var profesionales = centro.Profesionales ?? new List<Domain.Entities.Prestador>();
+            if (profesionales.Count == 0)
+            {
+                return Ok(new { centroId, direcciones = Array.Empty<object>() });
+            }
+
+            // 1) Traer agendas y horarios de TODOS los profesionales del centro en 2 queries
+            var profesionalIds = profesionales.Select(p => p.Id).ToList();
+            var agendas = await prestadorRepository.GetAgendasByProfesionalesAsync(profesionalIds);
+            if (agendas.Count == 0)
+            {
+                return Ok(new { centroId, direcciones = Array.Empty<object>() });
+            }
+
+            var agendaIds = agendas.Select(a => a.Id).ToList();
+            var horarios = await prestadorRepository.GetHorariosByAgendasAsync(agendaIds);
+
+            // Índices en memoria
+            var horariosPorAgenda = horarios
+                .GroupBy(h => h.AgendaId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var profesionalPorId = profesionales.ToDictionary(p => p.Id, p => p);
+
+            // Mapa de direcciones del propio centro: usamos SIEMPRE el lugar del centro como id estable
+            var direccionesCentroMap = BuildDireccionesMap(centro.Direcciones);
+
+            // key: texto direccion, value: (lugarId, direccionEntidad, lista de horariosAtencion)
+            var direccionesCentro = new Dictionary<string, (int lugarId, Direccion? direccionEntidad, List<object> horariosAtencion)>();
+
+            // 2) Recorrer agendas una sola vez y acumular DTOs de horarios por dirección
+            var agendasPorProfesional = agendas.GroupBy(a => a.ProfesionalId);
+            foreach (var grupoProfesional in agendasPorProfesional)
+            {
+                if (!profesionalPorId.TryGetValue(grupoProfesional.Key, out var profesional))
+                    continue;
+
+                foreach (var agenda in grupoProfesional)
+                {
+                    var direccionTexto = (agenda.Direccion ?? string.Empty).Trim();
+
+                    // Para la vista de centro, el lugarId siempre es el del CENTRO (no del profesional)
+                    if (!direccionesCentroMap.TryGetValue(direccionTexto, out var lugarId))
+                    {
+                        lugarId = 0;
+                    }
+
+                    if (!horariosPorAgenda.TryGetValue(agenda.Id, out var horariosDeAgenda) || horariosDeAgenda.Count == 0)
+                        continue;
+
+                    var horariosCanonicos = horariosDeAgenda
+                        .GroupBy(h => new
+                        {
+                            inicio = h.HoraInicio.ToString("HH:mm"),
+                            fin = h.HoraFin.ToString("HH:mm"),
+                            dur = h.DuracionConsulta,
+                            esp = h.EspecialidadId
+                        })
+                        .Select(g => new
+                        {
+                            id = g.Min(x => x.Id),
+                            diasDeLaSemana = g.Select(x => ToTituloDia(x.DiaDeAtencion)).Distinct().ToList(),
+                            horaInicio = g.Key.inicio,
+                            horaFin = g.Key.fin,
+                            duracionConsulta = (int?)g.Key.dur,
+                            especialidadId = (int?)g.Key.esp,
+                            prestadorId = profesional.Id
+                        })
+                        .Cast<object>()
+                        .ToList();
+
+                    Direccion? direccionEntidad = null;
+                    if (lugarId != 0)
+                        direccionEntidad = centro.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+
+                    if (!direccionesCentro.TryGetValue(direccionTexto, out var existente))
+                    {
+                        direccionesCentro[direccionTexto] = (lugarId, direccionEntidad, new List<object>(horariosCanonicos));
+                    }
+                    else
+                    {
+                        existente.horariosAtencion.AddRange(horariosCanonicos);
+                        var finalLugarId = existente.lugarId != 0 ? existente.lugarId : lugarId;
+                        var finalDireccionEntidad = existente.direccionEntidad ?? direccionEntidad;
+                        direccionesCentro[direccionTexto] = (finalLugarId, finalDireccionEntidad, existente.horariosAtencion);
+                    }
+                }
+            }
+
+            var direcciones = direccionesCentro
+                .Select(kvp => BuildDireccionDto(
+                    kvp.Key,
+                    kvp.Value.lugarId,
+                    kvp.Value.direccionEntidad,
+                    kvp.Value.horariosAtencion))
+                .ToList();
+
+            logger.LogSuccess("Agendas de centro obtenidas exitosamente.");
+            return Ok(new
+            {
+                centroId,
+                direcciones
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error al obtener las Agendas del centro médico.", ex);
             return StatusCode(500, "Error interno del servidor.");
         }
     }
@@ -127,10 +279,7 @@ public class AgendaController : ControllerBase
             if (prestador == null) return NotFound(new { message = "Profesional no encontrado" });
             var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesionalId);
 
-            var direccionesMap = prestador.Direcciones?.ToDictionary(
-                d => (d.Calle ?? string.Empty).Trim(),
-                d => d.Id
-            ) ?? new Dictionary<string, int>();
+            var direccionesMap = BuildDireccionesMap(prestador.Direcciones);
 
             var gruposPorDireccion = agendasDb.GroupBy(a => (a.Direccion ?? string.Empty).Trim()).ToList();
             var direcciones = new List<object>();
@@ -139,15 +288,9 @@ public class AgendaController : ControllerBase
                 var direccionTexto = grupo.Key;
                 if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
                 {
-                    prestador.Direcciones.Add(new Domain.Entities.Direccion
-                    {
-                        Calle = direccionTexto,
-                        Altura = "S/N",
-                        ProvinciaCiudad = "S/D"
-                    });
-                    await prestadorRepository.UpdateAsync(prestador);
-                    direccionesMap = prestador.Direcciones.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id);
-                    lugarId = direccionesMap[direccionTexto];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lugarId = 0;
                 }
 
                 var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -172,16 +315,15 @@ public class AgendaController : ControllerBase
                         horaInicio = g.Key.inicio,
                         horaFin = g.Key.fin,
                         duracionConsulta = (int?)g.Key.dur,
-                        especialidadId = (int?)g.Key.esp
+                        especialidadId = (int?)g.Key.esp,
+                        prestadorId = profesionalId
                     })
+                    .Cast<object>()
                     .ToList();
 
-                direcciones.Add(new
-                {
-                    lugarId,
-                    direccion = direccionTexto,
-                    horariosAtencion = horariosCanonicos
-                });
+                var direccionEntidad = prestador.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+
+                direcciones.Add(BuildDireccionDto(direccionTexto, lugarId, direccionEntidad, horariosCanonicos));
             }
 
             logger.LogSuccess("Agenda actualizada exitosamente.");
@@ -257,7 +399,7 @@ public class AgendaController : ControllerBase
 
 			// Respuesta canónica (igual que GET/PUT)
 			var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesionalId);
-			var direccionesMap = prestador.Direcciones?.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id) ?? new Dictionary<string, int>();
+			var direccionesMap = BuildDireccionesMap(prestador.Direcciones);
 			var gruposPorDireccion = agendasDb.GroupBy(a => (a.Direccion ?? string.Empty).Trim()).ToList();
 			var direcciones = new List<object>();
 			foreach (var grupo in gruposPorDireccion)
@@ -265,10 +407,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = prestador.Direcciones.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -287,11 +428,15 @@ public class AgendaController : ControllerBase
 						horaInicio = g.Key.inicio,
 						horaFin = g.Key.fin,
 						duracionConsulta = (int?)g.Key.dur,
-						especialidadId = (int?)g.Key.esp
+						especialidadId = (int?)g.Key.esp,
+						prestadorId = profesionalId
 					})
+					.Cast<object>()
 					.ToList();
 
-				direcciones.Add(new { lugarId = lid, direccion = dirTxt, horariosAtencion = horariosCanonicos });
+				var direccionEntidadDetalle = prestador.Direcciones?.FirstOrDefault(d => d.Id == lid);
+
+				direcciones.Add(BuildDireccionDto(dirTxt, lid, direccionEntidadDetalle, horariosCanonicos));
 			}
 
 			logger.LogSuccess("Horario(s) creado(s) exitosamente.");
@@ -405,7 +550,7 @@ public class AgendaController : ControllerBase
 
 			// Respuesta canónica (igual que GET/PUT)
 			var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesionalId);
-			var direccionesMap = prestador.Direcciones?.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id) ?? new Dictionary<string, int>();
+			var direccionesMap = BuildDireccionesMap(prestador.Direcciones);
 			var gruposPorDireccion = agendasDb.GroupBy(a => (a.Direccion ?? string.Empty).Trim()).ToList();
 			var direcciones = new List<object>();
 			foreach (var grupo in gruposPorDireccion)
@@ -413,10 +558,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = prestador.Direcciones.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -435,7 +579,8 @@ public class AgendaController : ControllerBase
 						horaInicio = g.Key.inicio,
 						horaFin = g.Key.fin,
 						duracionConsulta = (int?)g.Key.dur,
-						especialidadId = (int?)g.Key.esp
+						especialidadId = (int?)g.Key.esp,
+						prestadorId = profesionalId
 					})
 					.ToList();
 
@@ -480,7 +625,7 @@ public class AgendaController : ControllerBase
 
 			// Respuesta canónica (igual que GET/PUT)
 			var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesionalId);
-			var direccionesMap = prestador.Direcciones?.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id) ?? new Dictionary<string, int>();
+			var direccionesMap = BuildDireccionesMap(prestador.Direcciones);
 			var gruposPorDireccion = agendasDb.GroupBy(a => (a.Direccion ?? string.Empty).Trim()).ToList();
 			var direcciones = new List<object>();
 			foreach (var grupo in gruposPorDireccion)
@@ -488,10 +633,9 @@ public class AgendaController : ControllerBase
 				var dirTxt = grupo.Key;
 				if (!direccionesMap.TryGetValue(dirTxt, out var lid))
 				{
-					prestador.Direcciones.Add(new Domain.Entities.Direccion { Calle = dirTxt, Altura = "S/N", ProvinciaCiudad = "S/D" });
-					await prestadorRepository.UpdateAsync(prestador);
-					direccionesMap = prestador.Direcciones.ToDictionary(d => (d.Calle ?? string.Empty).Trim(), d => d.Id);
-					lid = direccionesMap[dirTxt];
+                    // No crear direcciones nuevas desde este endpoint.
+                    // Si la dirección no existe como lugar del prestador, se devuelve lugarId = 0.
+                    lid = 0;
 				}
 
 				var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -512,9 +656,12 @@ public class AgendaController : ControllerBase
 						duracionConsulta = (int?)g.Key.dur,
 						especialidadId = (int?)g.Key.esp
 					})
+					.Cast<object>()
 					.ToList();
 
-				direcciones.Add(new { lugarId = lid, direccion = dirTxt, horariosAtencion = horariosCanonicos });
+				var direccionEntidadDetalle = prestador.Direcciones?.FirstOrDefault(d => d.Id == lid);
+
+				direcciones.Add(BuildDireccionDto(dirTxt, lid, direccionEntidadDetalle, horariosCanonicos));
 			}
 
 			logger.LogSuccess("Horario eliminado exitosamente.");
@@ -592,6 +739,12 @@ public class AgendaController : ControllerBase
                             ? espProp.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.Number).Select(x => x.GetInt32()).ToList()
                             : new List<int>()
                     };
+
+                    // ProfesionalId opcional (para centros médicos)
+                    if (h.TryGetProperty("profesionalId", out var profProp) && profProp.ValueKind == JsonValueKind.Number)
+                    {
+                        horario.ProfesionalId = profProp.GetInt32();
+                    }
 
                     // Flag de borrado opcional
                     if (h.TryGetProperty("deleted", out var delProp) && (delProp.ValueKind == JsonValueKind.True || delProp.ValueKind == JsonValueKind.False))

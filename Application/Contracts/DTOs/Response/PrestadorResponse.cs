@@ -9,6 +9,9 @@ public class PrestadorResponse
     public string NombreCompleto { get; set; }
     public int Rol { get; set; }
     public string? CentroMedico { get; set; }
+    public int? CentroId { get; set; }
+    // Para centros médicos: lista de IDs de profesionales asociados a ese centro.
+    public List<int> ProfesionalesIds { get; set; } = new List<int>();
     public bool Activo { get; set; }
     public List<int> Especialidades { get; set; } = new List<int>();
     public DocumentacionDTO Documentacion { get; set; }
