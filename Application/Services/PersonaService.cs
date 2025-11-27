@@ -78,9 +78,9 @@ namespace Application.Services
             return response;
         }
 
-        public Task<bool> ToggleStatusAsync(int id, DateTime? fecha)
+        public Task<bool> ToggleStatusAsync(int id, bool activo, DateTime? fecha)
         {
-            return _personaRepo.ToggleStatusAsync(id, fecha ?? DateTime.Now.Date);
+            return _personaRepo.ToggleStatusAsync(id, activo, fecha);
         }
 
         public async Task<PersonaResponse> UpdatePersonAsync(PersonaRequest request)

@@ -20,23 +20,6 @@ public class AfiliadoService : IAfiliadoService
 
     public async Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request)
     {
-        // === DEBUG DESERIALIZACIÓN ===
-        Console.WriteLine("========== DEBUG AfiliadoRequest recibido ==========");
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(request, new System.Text.Json.JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
-        Console.WriteLine($"Integrantes count: {(request.Integrantes == null ? "null" : request.Integrantes.Count.ToString())}");
-
-        if (request.Integrantes != null)
-        {
-            foreach (var i in request.Integrantes)
-            {
-                Console.WriteLine($"Integrante -> {i.Nombre} {i.Apellido}, Parentesco: {i.Parentesco}, FechaNacimiento: {i.FechaNacimiento}");
-            }
-        }
-        Console.WriteLine("====================================================");
-
         // Obtenemos el titular
         PersonaRequest? titularReq = request.Integrantes?.FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular);
         if (titularReq == null)
