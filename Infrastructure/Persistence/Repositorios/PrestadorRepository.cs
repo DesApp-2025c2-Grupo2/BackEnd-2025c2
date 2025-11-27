@@ -47,6 +47,8 @@ public class PrestadorRepository : IPrestadorRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    
+
     public async Task UpdateAsync(Prestador prestador)
     {
         context.Prestadores.Update(prestador);
@@ -149,6 +151,20 @@ public class PrestadorRepository : IPrestadorRepository
     public async Task<List<Agenda>> GetAgendasByProfesionalAsync(int profesionalId)
     {
         return await context.Agendas.Where(a => a.ProfesionalId == profesionalId).ToListAsync();
+    }
+
+    public async Task<List<Agenda>> GetAgendasByProfesionalesAsync(IEnumerable<int> profesionalIds)
+    {
+        var ids = profesionalIds?.Distinct().ToList() ?? new List<int>();
+        if (ids.Count == 0) return new List<Agenda>();
+        return await context.Agendas.Where(a => ids.Contains(a.ProfesionalId)).ToListAsync();
+    }
+
+    public async Task<List<HorarioAtencion>> GetHorariosByAgendasAsync(IEnumerable<int> agendaIds)
+    {
+        var ids = agendaIds?.Distinct().ToList() ?? new List<int>();
+        if (ids.Count == 0) return new List<HorarioAtencion>();
+        return await context.HorariosAtencion.Where(h => ids.Contains(h.AgendaId)).ToListAsync();
     }
 
     public async Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion)

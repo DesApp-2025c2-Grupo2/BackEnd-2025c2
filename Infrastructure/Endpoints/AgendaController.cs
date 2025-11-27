@@ -34,6 +34,36 @@ public class AgendaController : ControllerBase
             .ToDictionary(g => g.Key, g => g.First().Id);
     }
 
+    // DTO que el front puede consumir directo: incluye id técnico (lugarId) y detalle de dirección
+    private static object BuildDireccionDto(
+        string direccionTexto,
+        int lugarId,
+        Direccion? direccionEntidad,
+        IEnumerable<object> horariosAtencion)
+    {
+        object? detalleDireccion = null;
+        if (direccionEntidad != null)
+        {
+            detalleDireccion = new
+            {
+                id = direccionEntidad.Id,
+                calle = direccionEntidad.Calle,
+                altura = direccionEntidad.Altura,
+                piso = direccionEntidad.Piso,
+                departamento = direccionEntidad.Departamento,
+                provinciaCiudad = direccionEntidad.ProvinciaCiudad,
+                codigoPostal = direccionEntidad.CodigoPostal
+            };
+        }
+
+        return new
+        {
+            lugarId,
+            detalleDireccion,
+            horariosAtencion
+        };
+    }
+
     [HttpGet("getByProfesional/{profesionalId:int}")]
     public async Task<IActionResult> GetAllByProfesionalAsync([FromRoute] int profesionalId)
     {
@@ -56,19 +86,10 @@ public class AgendaController : ControllerBase
             {
                 var direccionTexto = grupo.Key;
 
-                // Asegurar lugarId estable para la dirección (crear si no existe aún en Prestador.Direcciones)
+                // Usar lugarId solo si ya existe una Direccion; si no, devolver 0 (sin tocar la base de datos)
                 if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
                 {
-                    prestador.Direcciones.Add(new Domain.Entities.Direccion
-                    {
-                        Calle = direccionTexto,
-                        Altura = "S/N",
-                        ProvinciaCiudad = "S/D"
-                    });
-                    await prestadorRepository.UpdateAsync(prestador);
-                    // recargar map evitando claves duplicadas
-                    direccionesMap = BuildDireccionesMap(prestador.Direcciones);
-                    lugarId = direccionesMap[direccionTexto];
+                    lugarId = 0;
                 }
 
                 // Reunir horarios de todas las agendas en esta dirección
@@ -98,14 +119,16 @@ public class AgendaController : ControllerBase
                         especialidadId = (int?)g.Key.esp,
                         prestadorId = profesionalId
                     })
+                    .Cast<object>()
                     .ToList();
 
-                direcciones.Add(new
+                Direccion? direccionEntidad = null;
+                if (lugarId != 0)
                 {
-                    lugarId,
-                    direccion = direccionTexto,
-                    horariosAtencion = horariosCanonicos
-                });
+                    direccionEntidad = prestador.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+                }
+
+                direcciones.Add(BuildDireccionDto(direccionTexto, lugarId, direccionEntidad, horariosCanonicos));
             }
 
             logger.LogSuccess("Agenda obtenida exitosamente.");
@@ -133,44 +156,54 @@ public class AgendaController : ControllerBase
                 return BadRequest(new { message = "El prestador indicado no es un centro médico" });
 
             var profesionales = centro.Profesionales ?? new List<Domain.Entities.Prestador>();
-            var resultadoProfesionales = new List<object>();
-
-            foreach (var profesional in profesionales)
+            if (profesionales.Count == 0)
             {
-                var agendasDb = await prestadorRepository.GetAgendasByProfesionalAsync(profesional.Id);
+                return Ok(new { centroId, direcciones = Array.Empty<object>() });
+            }
+
+            // 1) Traer agendas y horarios de TODOS los profesionales del centro en 2 queries
+            var profesionalIds = profesionales.Select(p => p.Id).ToList();
+            var agendas = await prestadorRepository.GetAgendasByProfesionalesAsync(profesionalIds);
+            if (agendas.Count == 0)
+            {
+                return Ok(new { centroId, direcciones = Array.Empty<object>() });
+            }
+
+            var agendaIds = agendas.Select(a => a.Id).ToList();
+            var horarios = await prestadorRepository.GetHorariosByAgendasAsync(agendaIds);
+
+            // Índices en memoria
+            var horariosPorAgenda = horarios
+                .GroupBy(h => h.AgendaId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var profesionalPorId = profesionales.ToDictionary(p => p.Id, p => p);
+
+            // key: texto direccion, value: (lugarId, direccionEntidad, lista de horariosAtencion)
+            var direccionesCentro = new Dictionary<string, (int lugarId, Direccion? direccionEntidad, List<object> horariosAtencion)>();
+
+            // 2) Recorrer agendas una sola vez y acumular DTOs de horarios por dirección
+            var agendasPorProfesional = agendas.GroupBy(a => a.ProfesionalId);
+            foreach (var grupoProfesional in agendasPorProfesional)
+            {
+                if (!profesionalPorId.TryGetValue(grupoProfesional.Key, out var profesional))
+                    continue;
 
                 var direccionesMap = BuildDireccionesMap(profesional.Direcciones);
 
-                var gruposPorDireccion = agendasDb
-                    .GroupBy(a => (a.Direccion ?? string.Empty).Trim())
-                    .ToList();
-
-                var direcciones = new List<object>();
-                foreach (var grupo in gruposPorDireccion)
+                foreach (var agenda in grupoProfesional)
                 {
-                    var direccionTexto = grupo.Key;
+                    var direccionTexto = (agenda.Direccion ?? string.Empty).Trim();
 
                     if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
                     {
-                        profesional.Direcciones.Add(new Domain.Entities.Direccion
-                        {
-                            Calle = direccionTexto,
-                            Altura = "S/N",
-                            ProvinciaCiudad = "S/D"
-                        });
-                        await prestadorRepository.UpdateAsync(profesional);
-                        direccionesMap = BuildDireccionesMap(profesional.Direcciones);
-                        lugarId = direccionesMap[direccionTexto];
+                        lugarId = 0;
                     }
 
-                    var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
-                    foreach (var agenda in grupo)
-                    {
-                        var horarios = await prestadorRepository.GetHorariosByAgendaAsync(agenda.Id);
-                        horariosAcumulados.AddRange(horarios);
-                    }
+                    if (!horariosPorAgenda.TryGetValue(agenda.Id, out var horariosDeAgenda) || horariosDeAgenda.Count == 0)
+                        continue;
 
-                    var horariosCanonicos = horariosAcumulados
+                    var horariosCanonicos = horariosDeAgenda
                         .GroupBy(h => new
                         {
                             inicio = h.HoraInicio.ToString("HH:mm"),
@@ -188,29 +221,42 @@ public class AgendaController : ControllerBase
                             especialidadId = (int?)g.Key.esp,
                             prestadorId = profesional.Id
                         })
+                        .Cast<object>()
                         .ToList();
 
-                    direcciones.Add(new
+                    Direccion? direccionEntidad = null;
+                    if (lugarId != 0)
                     {
-                        lugarId,
-                        direccion = direccionTexto,
-                        horariosAtencion = horariosCanonicos
-                    });
-                }
+                        direccionEntidad = profesional.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+                    }
 
-                resultadoProfesionales.Add(new
-                {
-                    profesionalId = profesional.Id,
-                    nombreCompleto = profesional.NombreCompleto,
-                    direcciones
-                });
+                    if (!direccionesCentro.TryGetValue(direccionTexto, out var existente))
+                    {
+                        direccionesCentro[direccionTexto] = (lugarId, direccionEntidad, new List<object>(horariosCanonicos));
+                    }
+                    else
+                    {
+                        existente.horariosAtencion.AddRange(horariosCanonicos);
+                        var finalLugarId = existente.lugarId != 0 ? existente.lugarId : lugarId;
+                        var finalDireccionEntidad = existente.direccionEntidad ?? direccionEntidad;
+                        direccionesCentro[direccionTexto] = (finalLugarId, finalDireccionEntidad, existente.horariosAtencion);
+                    }
+                }
             }
+
+            var direcciones = direccionesCentro
+                .Select(kvp => BuildDireccionDto(
+                    kvp.Key,
+                    kvp.Value.lugarId,
+                    kvp.Value.direccionEntidad,
+                    kvp.Value.horariosAtencion))
+                .ToList();
 
             logger.LogSuccess("Agendas de centro obtenidas exitosamente.");
             return Ok(new
             {
                 centroId,
-                profesionales = resultadoProfesionales
+                direcciones
             });
         }
         catch (Exception ex)
@@ -279,14 +325,12 @@ public class AgendaController : ControllerBase
                         especialidadId = (int?)g.Key.esp,
                         prestadorId = profesionalId
                     })
+                    .Cast<object>()
                     .ToList();
 
-                direcciones.Add(new
-                {
-                    lugarId,
-                    direccion = direccionTexto,
-                    horariosAtencion = horariosCanonicos
-                });
+                var direccionEntidad = prestador.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
+
+                direcciones.Add(BuildDireccionDto(direccionTexto, lugarId, direccionEntidad, horariosCanonicos));
             }
 
             logger.LogSuccess("Agenda actualizada exitosamente.");
@@ -395,9 +439,12 @@ public class AgendaController : ControllerBase
 						especialidadId = (int?)g.Key.esp,
 						prestadorId = profesionalId
 					})
+					.Cast<object>()
 					.ToList();
 
-				direcciones.Add(new { lugarId = lid, direccion = dirTxt, horariosAtencion = horariosCanonicos });
+				var direccionEntidadDetalle = prestador.Direcciones?.FirstOrDefault(d => d.Id == lid);
+
+				direcciones.Add(BuildDireccionDto(dirTxt, lid, direccionEntidadDetalle, horariosCanonicos));
 			}
 
 			logger.LogSuccess("Horario(s) creado(s) exitosamente.");
@@ -619,9 +666,12 @@ public class AgendaController : ControllerBase
 						duracionConsulta = (int?)g.Key.dur,
 						especialidadId = (int?)g.Key.esp
 					})
+					.Cast<object>()
 					.ToList();
 
-				direcciones.Add(new { lugarId = lid, direccion = dirTxt, horariosAtencion = horariosCanonicos });
+				var direccionEntidadDetalle = prestador.Direcciones?.FirstOrDefault(d => d.Id == lid);
+
+				direcciones.Add(BuildDireccionDto(dirTxt, lid, direccionEntidadDetalle, horariosCanonicos));
 			}
 
 			logger.LogSuccess("Horario eliminado exitosamente.");
