@@ -182,6 +182,26 @@ public class PrestadorRepository : IPrestadorRepository
         context.HorariosAtencion.RemoveRange(existentes);
         await context.SaveChangesAsync();
     }
+
+    public async Task UpdateDireccionTextoForProfesionalAsync(int profesionalId, string oldDireccion, string newDireccion)
+    {
+        var oldTxt = (oldDireccion ?? string.Empty).Trim();
+        var newTxt = (newDireccion ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(oldTxt) || oldTxt == newTxt) return;
+
+        var agendas = await context.Agendas
+            .Where(a => a.ProfesionalId == profesionalId && a.Direccion == oldTxt)
+            .ToListAsync();
+
+        if (agendas.Count == 0) return;
+
+        foreach (var agenda in agendas)
+        {
+            agenda.Direccion = newTxt;
+        }
+
+        await context.SaveChangesAsync();
+    }
 }
 
 

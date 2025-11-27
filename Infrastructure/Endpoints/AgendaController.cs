@@ -86,11 +86,10 @@ public class AgendaController : ControllerBase
             {
                 var direccionTexto = grupo.Key;
 
-                // Usar lugarId solo si ya existe una Direccion; si no, devolver 0 (sin tocar la base de datos)
+                // Solo mostramos direcciones que existan como lugares propios del profesional.
+                // Los horarios que provienen de centros (sin lugar del profesional) no se exponen aquí.
                 if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
-                {
-                    lugarId = 0;
-                }
+                    continue;
 
                 // Reunir horarios de todas las agendas en esta dirección
                 var horariosAcumulados = new List<Domain.Entities.HorarioAtencion>();
@@ -179,6 +178,9 @@ public class AgendaController : ControllerBase
 
             var profesionalPorId = profesionales.ToDictionary(p => p.Id, p => p);
 
+            // Mapa de direcciones del propio centro: usamos SIEMPRE el lugar del centro como id estable
+            var direccionesCentroMap = BuildDireccionesMap(centro.Direcciones);
+
             // key: texto direccion, value: (lugarId, direccionEntidad, lista de horariosAtencion)
             var direccionesCentro = new Dictionary<string, (int lugarId, Direccion? direccionEntidad, List<object> horariosAtencion)>();
 
@@ -189,13 +191,12 @@ public class AgendaController : ControllerBase
                 if (!profesionalPorId.TryGetValue(grupoProfesional.Key, out var profesional))
                     continue;
 
-                var direccionesMap = BuildDireccionesMap(profesional.Direcciones);
-
                 foreach (var agenda in grupoProfesional)
                 {
                     var direccionTexto = (agenda.Direccion ?? string.Empty).Trim();
 
-                    if (!direccionesMap.TryGetValue(direccionTexto, out var lugarId))
+                    // Para la vista de centro, el lugarId siempre es el del CENTRO (no del profesional)
+                    if (!direccionesCentroMap.TryGetValue(direccionTexto, out var lugarId))
                     {
                         lugarId = 0;
                     }
@@ -226,9 +227,7 @@ public class AgendaController : ControllerBase
 
                     Direccion? direccionEntidad = null;
                     if (lugarId != 0)
-                    {
-                        direccionEntidad = profesional.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
-                    }
+                        direccionEntidad = centro.Direcciones?.FirstOrDefault(d => d.Id == lugarId);
 
                     if (!direccionesCentro.TryGetValue(direccionTexto, out var existente))
                     {

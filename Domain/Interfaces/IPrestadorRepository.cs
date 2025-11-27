@@ -33,4 +33,5 @@ public interface IPrestadorRepository
     // Helpers por direccion
     Task<List<Agenda>> GetAgendasByProfesionalAndDireccionAsync(int profesionalId, string direccion);
     Task DeleteAllHorariosByAgendaIdsAsync(List<int> agendaIds);
+    Task UpdateDireccionTextoForProfesionalAsync(int profesionalId, string oldDireccion, string newDireccion);
 }

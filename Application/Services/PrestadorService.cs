@@ -162,6 +162,9 @@ public class PrestadorService : IPrestadorService
         {
             if (dDto.Id.HasValue && dDto.Id.Value > 0 && direccionesExistentes.TryGetValue(dDto.Id.Value, out var existente))
             {
+                // Guardar el texto anterior para poder propagar cambios a las agendas
+                var oldCalle = (existente.Calle ?? string.Empty).Trim();
+
                 existente.Calle = dDto.Calle;
                 existente.Altura = string.IsNullOrWhiteSpace(dDto.Altura) ? "S/N" : dDto.Altura;
                 existente.Piso = dDto.Piso;
@@ -169,6 +172,13 @@ public class PrestadorService : IPrestadorService
                 existente.ProvinciaCiudad = string.IsNullOrWhiteSpace(dDto.ProvinciaCiudad) ? "S/D" : dDto.ProvinciaCiudad;
                 existente.CodigoPostal = dDto.CodigoPostal;
                 nuevasDirecciones.Add(existente);
+
+                // Si cambió el nombre de la calle, actualizar también las Agendas que usaban el texto viejo
+                var newCalle = (dDto.Calle ?? string.Empty).Trim();
+                if (!string.Equals(oldCalle, newCalle, StringComparison.OrdinalIgnoreCase))
+                {
+                    await prestadorRepo.UpdateDireccionTextoForProfesionalAsync(prestador.Id, oldCalle, newCalle);
+                }
             }
             else if (!string.IsNullOrWhiteSpace(dDto.Calle))
             {
