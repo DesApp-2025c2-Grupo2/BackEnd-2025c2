@@ -4,38 +4,48 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class Prestador
+public abstract class Prestador
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
-    public RolMedico Rol { get; set; } // 0: Centro Médico, 1: Profesional Independiente
-
+    // Atributos comunes
     [Required]
     [MaxLength(128)]
-    public string NombreCompleto { get; set; }
-
-    [MaxLength(128)]
-    public string? CentroMedico { get; set; } // Sin especificar, se asume que es un profesional independiente o centro medico
-
-    // Relación centro médico -> profesionales
-    // Para un profesional independiente, CentroId apunta al prestador que actúa como centro médico.
-    public int? CentroId { get; set; }
-    public Prestador? Centro { get; set; }
-    public List<Prestador> Profesionales { get; set; } = new List<Prestador>();
+    public string NombreCompleto { get; set; } = null!;
 
     [Required]
-    public DateTime Alta { get; set; }
-    public DateTime? Baja { get; set; }
+    public DateOnly Alta { get; set; }
+    public DateOnly? Baja { get; set; }
 
     // Navegacion bidireccional
-    public List<Especialidad> Especialidades { get; set; } = new List<Especialidad>();
-    public List<Documentacion> Documentaciones { get; set; } = new List<Documentacion>();
-    public List<Telefono> Telefonos { get; set; } = new List<Telefono>();
-    public List<Email> Emails { get; set; } = new List<Email>();
-    public List<Direccion> Direcciones { get; set; } = new List<Direccion>();
-    public List<Agenda> Agendas { get; set; } = new List<Agenda>();
+    public List<Documentacion> Documentacion { get; set; } = new();
+    public List<Email> Emails { get; set; } = new();
+    public List<Telefono> Telefonos { get; set; } = new();
+    public List<Especialidad> Especialidades { get; set; } = new();
+    public List<Direccion> Direcciones { get; set; } = new();
+}
 
+
+public class Profesional : Prestador
+{
+    [Required]
+    [MaxLength(16)]
+    public string Matricula { get; set; }
+
+    [ForeignKey(nameof(Centro))]
+    public int? CentroId { get; set; }
+    public CentroMedico? Centro { get; set; }
+    public List<AgendaProfesional> Agendas { get; set; } = new();
+
+}
+
+public class CentroMedico : Prestador
+{
+    public string? RazonSocial { get; set; }
+
+    // Navegacion bidireccional
+    public List<Profesional> Profesionales { get; set; } = new();
+    public List<AgendaCentroMedico> Agendas { get; set; } = new();
 }

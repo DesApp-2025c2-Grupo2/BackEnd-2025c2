@@ -8,7 +8,6 @@ namespace Infrastructure.Persistence.Configurations;
 public class ProjectContext : DbContext
 {
     public ProjectContext(DbContextOptions<ProjectContext> options) : base(options){ }
-    public ProjectContext(){ }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -35,12 +34,6 @@ public class ProjectContext : DbContext
         modelBuilder.Entity<Agenda>(entity => entity.ToTable("AGENDAS"));
         modelBuilder.Entity<SituacionTerapeutica>(entity => entity.ToTable("SITUACIONES_TERAPEUTICAS"));
 
-        // Relación self-reference: Centro médico -> Profesionales
-        modelBuilder.Entity<Prestador>()
-            .HasMany(p => p.Profesionales)
-            .WithOne(p => p.Centro)
-            .HasForeignKey(p => p.CentroId)
-            .OnDelete(DeleteBehavior.Restrict);
         // Forzar que todas las tablas y columnas sean en mayúsculas
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
@@ -91,19 +84,25 @@ public class ProjectContext : DbContext
     }
 
     // Definición de DbSet para cada entidad
+    public DbSet<Afiliado> Afiliados { get; set; }
     public DbSet<Persona> Personas { get; set; }
+    public DbSet<RegistroTerapeutico> HistorialesTerapeuticos { get; set; }
+    public DbSet<SituacionTerapeutica> SituacionesTerapeuticas { get; set; }
+    public DbSet<PlanMedico> PlanesMedicos { get; set; }
+
+    public DbSet<Prestador> Prestadores { get; set; }
+    public DbSet<Especialidad> Especialidades { get; set; }
+    public DbSet<Profesional> Profesionales { get; set; }
+    public DbSet<CentroMedico> CentrosMedicos { get; set; }
     public DbSet<Agenda> Agendas { get; set; }
+    public DbSet<AgendaProfesional> AgendasProfesionales { get; set; }
+    public DbSet<AgendaCentroMedico> AgendasCentrosMedicos { get; set; }
+    public DbSet<HorarioAtencion> HorariosAtencion { get; set; }
+
+    public DbSet<Telefono> Telefonos { get; set; }
     public DbSet<Direccion> Direcciones { get; set; }
     public DbSet<Documentacion> Documentaciones { get; set; }
     public DbSet<Email> Emails { get; set; }
-    public DbSet<Especialidad> Especialidades { get; set; }
-    public DbSet<Afiliado> Afiliados { get; set; }
-    public DbSet<HorarioAtencion> HorariosAtencion { get; set; }
-    public DbSet<PlanMedico> PlanesMedicos { get; set; }
-    public DbSet<Prestador> Prestadores { get; set; }
-    public DbSet<SituacionTerapeutica> SituacionesTerapeuticas { get; set; }
-    public DbSet<Telefono> Telefonos { get; set; }
-    public DbSet<RegistroTerapeutico> HistorialesTerapeuticos { get; set; }
     public DbSet<Reporte> Reportes { get; set; }
 
 }
