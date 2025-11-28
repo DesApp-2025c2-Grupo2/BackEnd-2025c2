@@ -16,8 +16,8 @@ public abstract class Prestador
     public string NombreCompleto { get; set; } = null!;
 
     [Required]
-    public DateOnly Alta { get; set; }
-    public DateOnly? Baja { get; set; }
+    public DateTime Alta { get; set; }
+    public DateTime? Baja { get; set; }
 
     // Navegacion bidireccional
     public List<Documentacion> Documentacion { get; set; } = new();

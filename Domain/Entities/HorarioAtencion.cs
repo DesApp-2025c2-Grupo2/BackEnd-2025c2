@@ -13,8 +13,8 @@ public class HorarioAtencion
     public int Orden { get; set; }
 
     public DiaAtencion Dia { get; set; }
-    public TimeOnly HoraInicio { get; set; }
-    public TimeOnly HoraFin { get; set; }
+    public DateTime HoraInicio { get; set; }
+    public DateTime HoraFin { get; set; }
     public int DuracionConsultaMinutos { get; set; }
     [Required]
     [ForeignKey(nameof(Especialidad))]
