@@ -9,9 +9,6 @@ public class HorarioAtencion
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    [Required]
-    public int Orden { get; set; }
-
     public List<HorarioDia> DiasAtencion { get; set; } = new();
     public DateTime HoraInicio { get; set; }
     public DateTime HoraFin { get; set; }
