@@ -21,11 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
+    <EmbeddedResource Include="Persistence\DBObjects\Packages\**\*.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Persistence\DBObjects\Packages\**\*.sql" />
+    <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
   
 </Project>

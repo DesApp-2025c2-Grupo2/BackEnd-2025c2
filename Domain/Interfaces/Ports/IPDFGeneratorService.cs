@@ -1,7 +1,6 @@
-﻿using Application.Contracts.DTOs.Internal.ReportData;
-using System.Data;
+﻿using Domain.DataModels;
 
-namespace Application.Contracts.ExternalServicesInterfaces;
+namespace Domain.Interfaces.Ports;
 
 public interface IPDFGeneratorService
 {

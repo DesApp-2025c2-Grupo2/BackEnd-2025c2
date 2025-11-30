@@ -4,7 +4,7 @@ using Application.Contracts.Interfaces;
 using Application.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Infrastructure.Endpoints;
+namespace WebAPI.Endpoints;
 
 
 [ApiController]

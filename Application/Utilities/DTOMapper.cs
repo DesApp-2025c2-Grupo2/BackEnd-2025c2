@@ -1,10 +1,10 @@
-﻿using Application.Contracts.DTOs.Response;
-using Domain.Entities;
-using Application.Contracts.DTOs.Internal;
-using Application.Contracts.DTOs.Internal.ReportData;
-using System.Data;
-using Domain.Enums;
+﻿using Application.Contracts.DTOs.Internal;
 using Application.Contracts.DTOs.Request;
+using Application.Contracts.DTOs.Response;
+using Domain.DataModels;
+using Domain.Entities;
+using Domain.Enums;
+using System.Data;
 
 namespace Application.Utilities;
 

@@ -3,8 +3,8 @@ using Application.Contracts.DTOs.Response;
 using Application.Contracts.Interfaces;
 using Application.Utilities;
 using Domain.Entities;
-using Domain.Interfaces;
 using Domain.Enums;
+using Domain.Interfaces.Repositories;
 
 namespace Application.Services;
 

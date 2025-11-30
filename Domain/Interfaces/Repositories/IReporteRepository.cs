@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using System.Data;
 
-namespace Domain.Interfaces;
+namespace Domain.Interfaces.Repositories;
 
 public interface IReporteRepository
 {
