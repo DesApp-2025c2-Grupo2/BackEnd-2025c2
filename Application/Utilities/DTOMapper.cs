@@ -108,11 +108,12 @@ public static class DTOMapper
 
     public static PrestadorResponse PrestadorToResponse(Prestador prestador)
     {
+        Documentacion? firstDoc = prestador.Documentacion.FirstOrDefault();
         PrestadorResponse dto = new PrestadorResponse
         {
             Id = prestador.Id,
             NombreCompleto = prestador.NombreCompleto,
-            Documentacion = DocumentacionToDTO(prestador.Documentacion[0]),
+            Documentacion = firstDoc != null ? DocumentacionToDTO(firstDoc) : throw new Exception("El prestador no tiene documentacion asignada"),
             Emails = prestador.Emails.Select(e => EmailToDTO(e)).ToList(),
             Telefonos = prestador.Telefonos.Select(t => TelefonoToDTO(t)).ToList(),
             Especialidades = new(),
@@ -145,7 +146,6 @@ public static class DTOMapper
         return new HorarioAtencionDTO
         {
             Id = h.Id,
-            Orden = h.Orden,
             DiasAtencion = DiasAtencionToDTO(h.DiasAtencion),
             HoraInicio = TimeOnly.FromDateTime(h.HoraInicio),
             HoraFin = TimeOnly.FromDateTime(h.HoraFin),
@@ -244,6 +244,10 @@ public static class DTOMapper
             prestador = ProfesionalToEntity(prestadorRequest);
         }
         prestador.Id = prestadorRequest.Id ?? 0;
+        if (prestador is Profesional prof)
+            prof.Agendas.ForEach(ag => ag.ProfesionalId = prestadorRequest.Id!.Value);
+        else if (prestador is CentroMedico centro)
+            centro.Agendas.ForEach(ag => ag.CentroMedicoId = prestadorRequest.Id!.Value);
         return prestador;
     }
 
@@ -318,6 +322,50 @@ public static class DTOMapper
         ProvinciaCiudad = dir.ProvinciaCiudad,
         CodigoPostal = dir.CodigoPostal
     };
+
+    public static Agenda AgendaToEntity(AgendaRequest request)
+    {
+        Agenda agenda;
+        RolMedico rol = request.HorariosAtencion[0].ProfesionalAsignado == null ? RolMedico.ProfesionalIndependiente : RolMedico.CentroMedico;
+        if (rol == RolMedico.ProfesionalIndependiente)
+        {
+            agenda = new AgendaProfesional
+            {
+                Id = request.Id,
+                Horarios = request.HorariosAtencion.Select(h => HorarioAtencionToEntity(h)).ToList()
+            };
+        }
+        else
+        {
+            agenda = new AgendaCentroMedico
+            {
+                Id = request.Id,
+                Horarios = request.HorariosAtencion.Select(h => HorarioAtencionToEntity(h)).ToList()
+            };
+        }
+        agenda.Horarios.ForEach(h => h.AgendaId = request.Id);
+        return agenda;
+    }
+
+    public static HorarioAtencion HorarioAtencionToEntity(HorarioAtencionDTO h)
+    {
+        HorarioAtencion horario = new HorarioAtencion
+        {
+            Id = h.Id ?? 0,
+            DiasAtencion = h.DiasAtencion.Select(d => new HorarioDia
+            {
+                Id = d.Id ?? 0,
+                HorarioId = h.Id ?? 0,
+                Dia = d.Dia
+            }).ToList(),
+            HoraInicio = new DateTime(1,1,1,h.HoraInicio.Hour,h.HoraInicio.Minute,h.HoraInicio.Second),
+            HoraFin = new DateTime(1,1,1,h.HoraFin.Hour,h.HoraFin.Minute,h.HoraFin.Second),
+            DuracionConsultaMinutos = h.DuracionMinutos,
+            EspecialidadId = h.Especialidad.Id,
+            ProfesionalAsignadoId = h.ProfesionalAsignado?.Id
+        };
+        return horario;
+    }
 
     #endregion
 

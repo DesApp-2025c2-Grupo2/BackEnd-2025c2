@@ -432,10 +432,12 @@ namespace Application.Services;
 public class PrestadorService : IPrestadorService
 {
     private readonly IPrestadorRepository prestadorRepo;
+    private readonly IAgendaRepository agendaRepo;
 
-    public PrestadorService(IPrestadorRepository prestadorRepo)
+    public PrestadorService(IPrestadorRepository prestadorRepository, IAgendaRepository agendaRepository)
     {
-        this.prestadorRepo = prestadorRepo;
+        prestadorRepo = prestadorRepository;
+        agendaRepo = agendaRepository;
     }
 
     public async Task<PrestadoresResponse> GetAllAsync()
@@ -459,6 +461,15 @@ public class PrestadorService : IPrestadorService
         if (prestadorRequest.Id.HasValue && prestadorRequest.Id.Value > 0) prestadorDB = await prestadorRepo.UpdateAsync(prestadorMapped, prestadorRequest.Especialidades);
         else prestadorDB = await prestadorRepo.CreateAsync(prestadorMapped, prestadorRequest.Especialidades);
         response = DTOMapper.PrestadorToResponse(prestadorDB);
+        return response;
+    }
+
+    public async Task<AgendaResponse> UpdateAgendaAsync(AgendaRequest request)
+    {
+        AgendaResponse response;
+        Agenda agendaMapped = DTOMapper.AgendaToEntity(request);
+        Agenda agendaDB = await agendaRepo.UpdateAsync(agendaMapped);
+        response = DTOMapper.AgendaToDTO(agendaDB);
         return response;
     }
 }

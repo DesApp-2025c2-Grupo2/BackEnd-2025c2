@@ -1,13 +1,10 @@
-﻿using Application.Contracts.DTOs.Response;
-using Domain.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
 
 namespace Application.Contracts.DTOs.Internal;
 
 public class HorarioAtencionDTO
 {
     public int? Id { get; set; }
-    public int? Orden { get; set; }
     public List<HorarioDiaDTO> DiasAtencion { get; set; }
     public TimeOnly HoraInicio { get; set; } // HH:mm:ss
     public TimeOnly HoraFin { get; set; } // HH:mm:ss
