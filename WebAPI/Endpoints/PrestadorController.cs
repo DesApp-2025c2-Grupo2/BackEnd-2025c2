@@ -34,7 +34,6 @@ public class PrestadorController : ControllerBase
         catch (Exception ex)
         {
             logger.LogError("Error al obtener los Prestadores.", ex);
-            Console.WriteLine(ex.StackTrace);
             result = StatusCode(500, "Error interno del servidor.");
         }
         return result;

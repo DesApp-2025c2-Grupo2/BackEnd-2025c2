@@ -8,4 +8,5 @@ public interface IReporteRepository
     Task<List<Reporte>> GetAllAsync();
     Task<(string,DataTable)> RetrieveAsync(string hexaID);
     Task<(string,DataTable)> GenerateAsync(Reporte reporte);
+    Task<bool> UpdateFileURLAsync(string hexaId, string url);
 }

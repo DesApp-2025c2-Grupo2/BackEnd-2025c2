@@ -3,6 +3,7 @@ using Application.Services;
 using Domain.Interfaces.Ports;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Adapters.PDFGenerator;
+using Infrastructure.Adapters.StorageService;
 using Infrastructure.Persistence.Repositorios;
 
 namespace WebAPI;
@@ -14,6 +15,7 @@ public static class DependencyContainer
         // Ejemplo:
         //services.AddScoped(typeof(IExternalServiceInterface), typeof(ExternalServiceAdapter));
         services.AddScoped(typeof(IPDFGeneratorService), typeof(PDFGeneratorService));
+        services.AddScoped(typeof(IStorageService), typeof(LocalStorageService));
         return services;
     }
     public static IServiceCollection AddServices(this IServiceCollection services)

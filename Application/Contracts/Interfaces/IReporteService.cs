@@ -15,11 +15,11 @@ public interface IReporteService
     /// </summary>
     /// <param name="hexaId"></param>
     /// <param name="tipo"></param>
-    Task<(string, byte[])> RetrieveAsync(string hexaId, int tipo);
+    Task<string> RegenerateAsync(string hexaId, int tipo);
     /// <summary>
     /// Genera un reporte.
     /// </summary>
     /// <param name="reporteRequest"></param>
     /// <returns></returns>
-    Task<(string, byte[])> GenerateAsync(ReporteRequest reporteRequest);
+    Task<string> GenerateAsync(ReporteRequest reporteRequest);
 }
