@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20251130013506_RefactorAtributesTypesMigration")]
+    partial class RefactorAtributesTypesMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,6 +295,10 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("HoraInicio")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("HORAINICIO");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ORDEN");
 
                     b.Property<int?>("ProfesionalAsignadoId")
                         .HasColumnType("NUMBER(10)")

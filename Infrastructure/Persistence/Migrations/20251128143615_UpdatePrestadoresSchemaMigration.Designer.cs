@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20251128143615_UpdatePrestadoresSchemaMigration")]
+    partial class UpdatePrestadoresSchemaMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,6 +280,10 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("AGENDAID");
 
+                    b.Property<int>("Dia")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("DIA");
+
                     b.Property<int>("DuracionConsultaMinutos")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("DURACIONCONSULTAMINUTOS");
@@ -285,13 +292,19 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("ESPECIALIDADID");
 
-                    b.Property<DateTime>("HoraFin")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<string>("HoraFin")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(48)")
                         .HasColumnName("HORAFIN");
 
-                    b.Property<DateTime>("HoraInicio")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<string>("HoraInicio")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(48)")
                         .HasColumnName("HORAINICIO");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ORDEN");
 
                     b.Property<int?>("ProfesionalAsignadoId")
                         .HasColumnType("NUMBER(10)")
@@ -310,32 +323,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_HORARIOS_ATENCION_PROFESIONALASIGNADOID");
 
                     b.ToTable("HORARIOS_ATENCION", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.HorarioDia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Dia")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("DIA");
-
-                    b.Property<int>("HorarioId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("HORARIOID");
-
-                    b.HasKey("Id")
-                        .HasName("PK_HORARIODIA");
-
-                    b.HasIndex("HorarioId")
-                        .HasDatabaseName("IX_HORARIODIA_HORARIOID");
-
-                    b.ToTable("HORARIODIA");
                 });
 
             modelBuilder.Entity("Domain.Entities.Persona", b =>
@@ -446,12 +433,13 @@ namespace Infrastructure.Persistence.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Alta")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<string>("Alta")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("ALTA");
 
-                    b.Property<DateTime?>("Baja")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<string>("Baja")
+                        .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("BAJA");
 
                     b.Property<string>("Discriminator")
@@ -465,10 +453,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("NOMBRECOMPLETO");
-
-                    b.Property<int>("Rol")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ROL");
 
                     b.HasKey("Id")
                         .HasName("PK_PRESTADORES");
@@ -806,18 +790,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("ProfesionalAsignado");
                 });
 
-            modelBuilder.Entity("Domain.Entities.HorarioDia", b =>
-                {
-                    b.HasOne("Domain.Entities.HorarioAtencion", "Horario")
-                        .WithMany("DiasAtencion")
-                        .HasForeignKey("HorarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_HORARIODIA_HORARIOS_ATENCION_HORARIOID");
-
-                    b.Navigation("Horario");
-                });
-
             modelBuilder.Entity("Domain.Entities.Persona", b =>
                 {
                     b.HasOne("Domain.Entities.Afiliado", "Afiliado")
@@ -925,11 +897,6 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Agenda", b =>
                 {
                     b.Navigation("Horarios");
-                });
-
-            modelBuilder.Entity("Domain.Entities.HorarioAtencion", b =>
-                {
-                    b.Navigation("DiasAtencion");
                 });
 
             modelBuilder.Entity("Domain.Entities.Persona", b =>
