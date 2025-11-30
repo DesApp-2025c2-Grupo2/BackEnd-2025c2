@@ -50,7 +50,9 @@ public class ReporteController : ControllerBase
             }
             else
             {
-                result = File(reporteData.Item2, "application/pdf", $"reporte_{reporteData.Item1}.pdf");
+                Response.Headers.Add("Content-Disposition", "inline; filename=\"reporte_" + reporteData.Item1 + ".pdf\"");
+
+                result = File(reporteData.Item2, "application/pdf");
             }
         }
         catch (Exception ex)
@@ -67,8 +69,9 @@ public class ReporteController : ControllerBase
         ActionResult result;
         try
         {
-            var reporteData = await service.GenerateAsync(reporteRequest);
-            result = File(reporteData.Item2, "application/pdf", $"reporte_{reporteData.Item1}.pdf");
+            var reporteData = await service.GenerateAsync(reporteRequest); 
+            Response.Headers.Add("Content-Disposition", "inline; filename=\"reporte_" + reporteData.Item1 + ".pdf\"");
+            result = File(reporteData.Item2, "application/pdf");
         }
         catch (Exception ex)
         {
