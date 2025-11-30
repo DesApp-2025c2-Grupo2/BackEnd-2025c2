@@ -15,13 +15,15 @@ public class ReporteService : IReporteService
 {
     private readonly IReporteRepository repository;
     private readonly IPDFGeneratorService pdfGenerator;
-    public ReporteService(IReporteRepository reporteRepository, IPDFGeneratorService pDFGeneratorService)
+    private readonly IStorageService storage;
+    public ReporteService(IReporteRepository reporteRepository, IPDFGeneratorService pDFGeneratorService, IStorageService storageService)
     {
         repository = reporteRepository;
         pdfGenerator = pDFGeneratorService;
+        storage = storageService;
     }
 
-    public async Task<(string, byte[])> GenerateAsync(ReporteRequest reporteRequest)
+    public async Task<string> GenerateAsync(ReporteRequest reporteRequest)
     {
         Reporte reporte = new Reporte
         {
@@ -41,8 +43,11 @@ public class ReporteService : IReporteService
 
         //Segun el tipo de reporte genero el PDF correspondiente
         byte[] pdfBytes = GetReport(reporte.Tipo, hexaId, reporteData);
-
-        return (hexaId, pdfBytes);
+        string relativePath = $"reports/reporte_{hexaId}.pdf";
+        await storage.SaveAsync(relativePath, pdfBytes);
+        bool updateURLResult = await repository.UpdateFileURLAsync(hexaId, relativePath);
+        if (!updateURLResult) throw new Exception("Error al actualizar la URL del archivo del reporte.");
+        return relativePath;
     }
 
     public async Task<ReportesResponse> GetAllAsync()
@@ -56,14 +61,15 @@ public class ReporteService : IReporteService
             {
                 HexaID = rep.CodigoIdentificatorio,
                 TipoReporte = rep.Tipo.ToString(),
-                Parametros = $"Desde: {rep.FechaDesde?.ToString("yyyy-MM-dd") ?? "N/A"}, Hasta: {rep.FechaHasta?.ToString("yyyy-MM-dd") ?? "N/A"}",
-                FechaGeneracion = rep.FechaGeneracion
+                Parametros = $"Desde: {rep.FechaDesde?.ToString("yyyy-MM-dd") ?? "N/A"}, Hasta: {rep.FechaHasta?.ToString("yyyy-MM-dd") ?? "N/A"}, AfiliadoId: {rep.AfiliadoId?.ToString() ?? "N/A"}",
+                FechaGeneracion = rep.FechaGeneracion,
+                FileURL = rep.FileURL ?? string.Empty
             });
         });
         return response;
     }
 
-    public async Task<(string, byte[])> RetrieveAsync(string hexaId, int tipo)
+    public async Task<string> RegenerateAsync(string hexaId, int tipo)
     {
         TipoReporte tipoReporte;
         try
@@ -79,7 +85,11 @@ public class ReporteService : IReporteService
 
         //Segun el tipo de reporte genero el PDF correspondiente
         byte[] pdfBytes = GetReport(tipoReporte, hexaId, reporteData);
-        return (hexaId, pdfBytes);
+        string relativePath = $"reports/reporte_{hexaId}.pdf";
+        await storage.SaveAsync(relativePath, pdfBytes);
+        bool updateURLResult = await repository.UpdateFileURLAsync(hexaId, relativePath);
+        if (!updateURLResult) throw new Exception("Error al actualizar la URL del archivo del reporte.");
+        return relativePath;
 
     }
 

@@ -2,6 +2,7 @@
 using Application.Contracts.DTOs.Response;
 using Application.Contracts.Interfaces;
 using Application.Utilities;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,6 +28,8 @@ public class ReporteController : ControllerBase
         try
         {
             ReportesResponse response = await service.GetAllAsync();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            response.ForEach(rep => rep.FileURL = Path.Combine(baseUrl, rep.FileURL));
             result = Ok(response);
         }
         catch (Exception ex)
@@ -37,27 +40,20 @@ public class ReporteController : ControllerBase
         return result;
     }
 
-    [HttpGet("retrieve")]
-    public async Task<IActionResult> RetrieveAsync([FromQuery][Required] string hexaId, [FromQuery][Required] int tipo)
+    [HttpGet("regenerate")]
+    public async Task<IActionResult> RegenerateAsync([FromQuery][Required] string hexaId, [FromQuery][Required] int tipo)
     {
         ActionResult result;
         try
         {
-            var reporteData = await service.RetrieveAsync(hexaId,tipo);
-            if (reporteData.Item2 == null || reporteData.Item2.Length == 0)
-            {
-                result = NotFound("Reporte no encontrado.");
-            }
-            else
-            {
-                Response.Headers.Add("Content-Disposition", "inline; filename=\"reporte_" + reporteData.Item1 + ".pdf\"");
-
-                result = File(reporteData.Item2, "application/pdf");
-            }
+            var relativePath = await service.RegenerateAsync(hexaId,tipo);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var fullUrl = Path.Combine(baseUrl,relativePath);
+            result = Ok(new { FileURL = fullUrl });
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error al recuperar el reporte con ID {hexaId}.", ex);
+            logger.LogError("Error al regenerar el reporte.", ex);
             result = StatusCode(500, "Error interno del servidor.");
         }
         return result;
@@ -69,9 +65,10 @@ public class ReporteController : ControllerBase
         ActionResult result;
         try
         {
-            var reporteData = await service.GenerateAsync(reporteRequest); 
-            Response.Headers.Add("Content-Disposition", "inline; filename=\"reporte_" + reporteData.Item1 + ".pdf\"");
-            result = File(reporteData.Item2, "application/pdf");
+            var relativePath = await service.GenerateAsync(reporteRequest);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var fullUrl = Path.Combine(baseUrl, relativePath);
+            result = Ok(new { FileURL = fullUrl });
         }
         catch (Exception ex)
         {
