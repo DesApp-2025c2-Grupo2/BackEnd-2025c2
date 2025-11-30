@@ -18,6 +18,8 @@ public abstract class Prestador
     [Required]
     public DateTime Alta { get; set; }
     public DateTime? Baja { get; set; }
+    [Required]
+    public RolMedico Rol { get; set; }
 
     // Navegacion bidireccional
     public List<Documentacion> Documentacion { get; set; } = new();

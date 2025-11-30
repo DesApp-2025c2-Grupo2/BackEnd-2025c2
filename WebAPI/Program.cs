@@ -22,10 +22,8 @@ builder.Services.AddServices();
 // Inyección de repositorios
 builder.Services.AddRepositories();
 
-// Inyección de endpoints (incluyendo controladores definidos en el proyecto Infrastructure)
-builder.Services
-    .AddControllers()
-    .AddApplicationPart(typeof(Infrastructure.Endpoints.AgendaController).Assembly);
+// Inyección de endpoints
+builder.Services.AddControllers();
 
 // Inyección de logger
 builder.Services.AddSingleton<IProjectLogger, ProjectLogger>();
@@ -39,7 +37,9 @@ builder.Services.AddCors(options =>
             origin.StartsWith("http://10.8.0.") ||
             origin.StartsWith("https://10.8.0.") ||
             origin.StartsWith("http://localhost") ||
-            origin.StartsWith("https://localhost"))
+            origin.StartsWith("https://localhost") ||
+            origin.StartsWith("http://liveserver") ||
+            origin.StartsWith("https://liveserver"))
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
