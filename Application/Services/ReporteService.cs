@@ -56,7 +56,7 @@ public class ReporteService : IReporteService
             {
                 HexaID = rep.CodigoIdentificatorio,
                 TipoReporte = rep.Tipo.ToString(),
-                Parametros = $"Desde: {rep.FechaDesde?.ToString("yyyy-MM-dd") ?? "N/A"}, Hasta: {rep.FechaHasta?.ToString("yyyy-MM-dd") ?? "N/A"}, AfiliadoId: {rep.AfiliadoId?.ToString() ?? "N/A"}",
+                Parametros = $"Desde: {rep.FechaDesde?.ToString("yyyy-MM-dd") ?? "N/A"}, Hasta: {rep.FechaHasta?.ToString("yyyy-MM-dd") ?? "N/A"}",
                 FechaGeneracion = rep.FechaGeneracion
             });
         });

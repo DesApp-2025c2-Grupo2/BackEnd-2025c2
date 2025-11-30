@@ -94,8 +94,8 @@ namespace Application.Services
             persona.FechaNacimiento = request.FechaNacimiento;
             persona.Parentesco = (Parentesco)request.Parentesco;
             persona.AfiliadoId = request.AfiliadoId.HasValue ? (int)request.AfiliadoId.Value : 0; // Manejo de null
-            persona.Alta = request.Alta;
-            persona.Baja = request.Baja;
+            persona.Alta = persona.Alta;
+            persona.Baja = persona.Baja;
             persona.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new List<Telefono>();
             persona.Emails = request.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new List<Email>();
             persona.Direcciones = request.Direcciones?.Select(d => new Direccion
