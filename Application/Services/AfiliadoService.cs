@@ -12,10 +12,12 @@ namespace Application.Services;
 public class AfiliadoService : IAfiliadoService
 {
     private readonly IAfiliadoRepository afiliadoRepository;
+    private readonly IPersonaService personaService;
 
-    public AfiliadoService(IAfiliadoRepository afiliadoRepo)
+    public AfiliadoService(IAfiliadoRepository afiliadoRepo, IPersonaService personaServ)
     {
         afiliadoRepository = afiliadoRepo;
+        personaService = personaServ;
     }
 
     public async Task<AfiliadoResponse> CreateAsync(AfiliadoRequest request)
@@ -77,6 +79,13 @@ public class AfiliadoService : IAfiliadoService
 
     public async Task<bool> UpdateAsync(int id, AfiliadoRequest request)
     {
+        PersonaRequest? titularReq = request.Integrantes?
+            .FirstOrDefault(p => p.Parentesco == (int)Parentesco.Titular);
+
+        if (titularReq == null)
+            throw new Exception("Debe enviarse el titular dentro de 'integrantes'.");
+
+        // Actualizar los datos del afiliado
         Afiliado afiliado = new Afiliado()
         {
             Id = id,
@@ -86,10 +95,19 @@ public class AfiliadoService : IAfiliadoService
             Alta = request.Alta,
             Baja = request.Baja
         };
+
         await afiliadoRepository.UpdateAsync(afiliado);
+
+        // Actualizar titular usando PersonaService
+        // Forzamos que el AfiliadoID sea el del afiliado que se está editando
+        titularReq.AfiliadoId = id;
+
+        await personaService.UpdatePersonAsync(titularReq);
+
         return true;
     }
-    
+
+
     public async Task<AfiliadosResponse> GetAllAsync()
     {
         AfiliadosResponse response = new AfiliadosResponse();

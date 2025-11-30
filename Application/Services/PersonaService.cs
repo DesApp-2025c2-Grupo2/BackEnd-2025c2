@@ -35,9 +35,44 @@ public class PersonaService : IPersonaService
             }).ToList() ?? new List<Telefono>(),
             Emails = request.Emails?.Select(e => new Email
             {
-                Correo = e.Correo,
-            }).ToList() ?? new List<Email>(),
-            Direcciones = request.Direcciones?.Select(d => new Direccion
+                return DTOMapper.PersonaToDTO(persona);
+            }
+            else
+            {
+                throw new Exception("Error al guardar la persona");
+            }
+        }
+
+        public async Task<PersonaResponse> GetByIdAsync(int id)
+        {
+            PersonaResponse response;
+            var personaEntity = await _personaRepo.GetByIdAsync(id);
+            if (personaEntity == null) throw new KeyNotFoundException("Familiar no encontrado.");
+            response = DTOMapper.PersonaToDTO(personaEntity);
+            return response;
+        }
+
+        public Task<bool> ToggleStatusAsync(int id, bool activo, DateTime? fecha)
+        {
+            return _personaRepo.ToggleStatusAsync(id, activo, fecha);
+        }
+
+        public async Task<PersonaResponse> UpdatePersonAsync(PersonaRequest request)
+        {
+            var persona = await _personaRepo.GetByIdAsync(request.Id ?? 0);
+            if (persona == null) throw new Exception("Persona no encontrada");
+
+            persona.NumeroIntegrante = request.NumeroIntegrante;
+            persona.Nombre = request.Nombre;
+            persona.Apellido = request.Apellido;
+            persona.FechaNacimiento = request.FechaNacimiento;
+            persona.Parentesco = (Parentesco)request.Parentesco;
+            persona.AfiliadoId = request.AfiliadoId.HasValue ? (int)request.AfiliadoId.Value : 0; // Manejo de null
+            persona.Alta = persona.Alta;
+            persona.Baja = persona.Baja;
+            persona.Telefonos = request.Telefonos?.Select(t => new Telefono { Numero = t.Numero }).ToList() ?? new List<Telefono>();
+            persona.Emails = request.Emails?.Select(e => new Email { Correo = e.Correo }).ToList() ?? new List<Email>();
+            persona.Direcciones = request.Direcciones?.Select(d => new Direccion
             {
                 Calle = d.Calle,
                 Altura = d.Altura,
