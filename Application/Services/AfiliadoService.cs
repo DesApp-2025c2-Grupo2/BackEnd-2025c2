@@ -5,7 +5,7 @@ using Application.Contracts.Interfaces;
 using Application.Utilities;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 
 namespace Application.Services;
 

@@ -2,7 +2,7 @@
 using Application.Contracts.DTOs.Response;
 using Application.Contracts.Interfaces;
 using Domain.Entities;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 
 namespace Application.Services;
 

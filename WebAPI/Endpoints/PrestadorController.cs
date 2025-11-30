@@ -7,7 +7,7 @@ using Infrastructure.Persistence.Configurations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Endpoints;
+namespace WebAPI.Endpoints;
 
 
 [ApiController]

@@ -1,12 +1,12 @@
-﻿using Application.Contracts.DTOs.Internal.ReportData;
-using Application.Contracts.DTOs.Request;
+﻿using Application.Contracts.DTOs.Request;
 using Application.Contracts.DTOs.Response;
-using Application.Contracts.ExternalServicesInterfaces;
 using Application.Contracts.Interfaces;
 using Application.Utilities;
+using Domain.DataModels;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Interfaces;
+using Domain.Interfaces.Ports;
+using Domain.Interfaces.Repositories;
 using System.Data;
 
 namespace Application.Services;

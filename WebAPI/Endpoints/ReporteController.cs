@@ -5,7 +5,7 @@ using Application.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Infrastructure.Endpoints;
+namespace WebAPI.Endpoints;
 
 
 [ApiController]

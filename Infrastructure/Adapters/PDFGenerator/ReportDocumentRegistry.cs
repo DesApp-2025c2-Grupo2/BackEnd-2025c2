@@ -1,6 +1,5 @@
-﻿using Application.Contracts.DTOs.Internal.ReportData;
+﻿using Domain.DataModels;
 using Infrastructure.Adapters.PDFGenerator.Documents;
-using QuestPDF.Infrastructure;
 
 namespace Infrastructure.Adapters.PDFGenerator;
 
