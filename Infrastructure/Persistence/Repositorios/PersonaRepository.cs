@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 
 namespace Infrastructure.Persistence.Repositorios
 {

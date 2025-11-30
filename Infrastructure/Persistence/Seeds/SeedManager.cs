@@ -1,12 +1,11 @@
-﻿using Application.Utilities;
-using Infrastructure.Persistence.Configurations;
+﻿using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Seeds;
 
 public static class SeedManager
 {
-    public static async Task InitializeAsync(ProjectContext context, IProjectLogger logger)
+    public static async Task InitializeAsync(ProjectContext context)
     {
         await SeedSituacionTerapeutica(context);
         await SeedEspecialidades(context);
@@ -14,7 +13,6 @@ public static class SeedManager
 
         await SeedAfiliados(context);
         await SeedPersonas(context);
-        logger.LogInformation("Seeds inicializados correctamente.");
     }
     
     

@@ -1,7 +1,7 @@
-﻿using Application.Contracts.ExternalServicesInterfaces;
-using Application.Contracts.Interfaces;
+﻿using Application.Contracts.Interfaces;
 using Application.Services;
-using Domain.Interfaces;
+using Domain.Interfaces.Ports;
+using Domain.Interfaces.Repositories;
 using Infrastructure.Adapters.PDFGenerator;
 using Infrastructure.Persistence.Repositorios;
 

@@ -1,5 +1,5 @@
-﻿using Application.Contracts.DTOs.Internal.ReportData;
-using Application.Contracts.ExternalServicesInterfaces;
+﻿using Domain.DataModels;
+using Domain.Interfaces.Ports;
 using Infrastructure.Adapters.PDFGenerator.Documents;
 using Microsoft.AspNetCore.Hosting;
 using QuestPDF.Fluent;

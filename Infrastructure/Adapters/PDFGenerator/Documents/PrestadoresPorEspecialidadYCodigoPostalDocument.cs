@@ -1,4 +1,4 @@
-﻿using Application.Contracts.DTOs.Internal.ReportData;
+﻿using Domain.DataModels;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
