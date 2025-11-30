@@ -59,10 +59,6 @@ namespace Infrastructure.Persistence.Repositorios
             if (persona == null)
                 throw new KeyNotFoundException("Familiar no encontrado.");
 
-            // Si el afiliado está dado de baja, NO permitir cambios
-            if (persona.Afiliado != null && persona.Afiliado.Baja != null)
-                throw new InvalidOperationException("No se puede modificar familiares de un afiliado dado de baja.");
-
             if (activo)
             {
                 // ACTIVAR
