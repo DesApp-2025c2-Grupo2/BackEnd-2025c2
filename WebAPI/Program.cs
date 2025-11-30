@@ -33,7 +33,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVPNRange", policy =>
     {
+        // los origines puede ser tambien un archivo file:// o null (postman)
         policy.SetIsOriginAllowed(origin =>
+            origin == "null" ||
             origin.StartsWith("http://10.8.0.") ||
             origin.StartsWith("https://10.8.0.") ||
             origin.StartsWith("http://localhost") ||

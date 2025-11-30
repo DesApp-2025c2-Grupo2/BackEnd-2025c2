@@ -165,4 +165,19 @@ public class ReporteRepository : IReporteRepository
         return (hexaID, reportData);
 
     }
+
+    public async Task<bool> UpdateFileURLAsync(string hexaId, string url)
+    {
+        bool operationResult = false;
+        var reporte = await context.Reportes.FirstOrDefaultAsync(r => r.CodigoIdentificatorio == hexaId);
+        if (reporte != null)
+        {
+            reporte.FileURL = url;
+            context.Reportes.Update(reporte);
+            await context.SaveChangesAsync();
+            operationResult = true;
+        }
+        return operationResult;
+    }
+    
 }

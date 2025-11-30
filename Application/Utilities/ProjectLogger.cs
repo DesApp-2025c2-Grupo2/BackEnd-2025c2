@@ -34,6 +34,7 @@ public class ProjectLogger : IProjectLogger
         if (exception != null)
         {
             Console.WriteLine($"   → {exception.Message}");
+            Console.WriteLine($"   → {exception.StackTrace}");
         }
         Console.ResetColor();
     }

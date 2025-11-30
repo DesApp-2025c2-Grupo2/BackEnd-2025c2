@@ -14,4 +14,5 @@ public class Reporte
     public int? AfiliadoId { get; set; }
     [Required]
     public DateTime FechaGeneracion { get; set; }
+    public string? FileURL { get; set; }
 }

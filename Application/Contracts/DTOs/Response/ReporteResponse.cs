@@ -8,4 +8,5 @@ public class ReporteResponse
     public string TipoReporte { get; set; }
     public string Parametros { get; set; }
     public DateTime FechaGeneracion { get; set; }
+    public string FileURL { get; set; }
 }
