@@ -48,7 +48,7 @@ public class ReporteController : ControllerBase
         {
             var relativePath = await service.RegenerateAsync(hexaId,tipo);
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var fullUrl = Path.Combine(baseUrl,relativePath);
+            var fullUrl = $"{baseUrl}/{relativePath}";
             result = Ok(new { FileURL = fullUrl });
         }
         catch (Exception ex)
@@ -67,7 +67,7 @@ public class ReporteController : ControllerBase
         {
             var relativePath = await service.GenerateAsync(reporteRequest);
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var fullUrl = Path.Combine(baseUrl, relativePath);
+            var fullUrl = $"{baseUrl}/{relativePath}";
             result = Ok(new { FileURL = fullUrl });
         }
         catch (Exception ex)
