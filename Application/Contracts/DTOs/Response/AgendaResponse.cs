@@ -7,7 +7,7 @@ public class AgendaResponse
 {
     public int Id { get; set; }
 
-    public string DireccionAtencion { get; set; }
+    public string? DireccionAtencion { get; set; }
     public List<HorarioAtencionDTO> Horarios { get; set; }
 
 }

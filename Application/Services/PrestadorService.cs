@@ -5,6 +5,7 @@ using Application.Utilities;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using System.Diagnostics;
 
 namespace Application.Services;
 
@@ -467,9 +468,19 @@ public class PrestadorService : IPrestadorService
     public async Task<AgendaResponse> UpdateAgendaAsync(AgendaRequest request)
     {
         AgendaResponse response;
-        Agenda agendaMapped = DTOMapper.AgendaToEntity(request);
-        Agenda agendaDB = await agendaRepo.UpdateAsync(agendaMapped);
-        response = DTOMapper.AgendaToDTO(agendaDB);
+        Agenda agendaDB;
+        if (request.HorariosAtencion.Count > 0)
+        {
+            agendaDB = await agendaRepo.UpdateAsync(DTOMapper.AgendaToEntity(request));
+            Debug.WriteLine(agendaDB);
+            response = DTOMapper.AgendaToDTO(agendaDB);
+
+        }
+        else
+        {
+            await agendaRepo.ClearAsync(request.Id);
+            response = new AgendaResponse { Id = request.Id, Horarios = new() };
+        }
         return response;
     }
 }
