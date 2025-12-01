@@ -147,11 +147,13 @@ public class PrestadorRepository : IPrestadorRepository
 
         List<Direccion> dirsReq = prestadorRequest.Direcciones;
 
+        // Direcciones a eliminar: las que están en la DB pero no vienen en el request
         List<Direccion> dirsToRemove = dirsDB.Where(d => !dirsReq.Any(dr => dr.Id == d.Id)).ToList();
 
         // Direcciones nuevas: las que vienen en el request con Id == 0
         List<Direccion> dirsToAdd = dirsReq.Where(dr => dr.Id == 0).ToList();
 
+        // Direcciones a actualizar: las que ya existen en la DB y vienen en el request
         List<Direccion> dirsToUpdate = dirsDB.Where(d => dirsReq.Any(dr => dr.Id == d.Id)).ToList();
 
         // Eliminamos primero las Agendas asociadas a las direcciones a eliminar
@@ -173,7 +175,34 @@ public class PrestadorRepository : IPrestadorRepository
 
         // Agregamos las nuevas direcciones
         foreach (var dir in dirsToAdd) prestadorDB.Direcciones.Add(dir);
-        
+
+        // Agregamos las nuevas agendas asociadas a las direcciones nuevas
+        foreach (var dir in dirsToAdd)
+        {
+            if (prestadorDB is CentroMedico centro)
+            {
+                var agendasReq = (prestadorRequest as CentroMedico)!.Agendas
+                    .Where(a => a.DireccionId == dir.Id)
+                    .ToList();
+                foreach (var a in agendasReq)
+                {
+                    a.DireccionAtencion = dir;
+                    centro.Agendas.Add(a);
+                }
+            }
+            if (prestadorDB is Profesional prof)
+            {
+                var agendasReq = (prestadorRequest as Profesional)!.Agendas
+                    .Where(a => a.DireccionId == dir.Id)
+                    .ToList();
+                foreach (var a in agendasReq)
+                {
+                    a.DireccionAtencion = dir;
+                    prof.Agendas.Add(a);
+                }
+            }
+        }
+
         // Actualizamos las existentes
         foreach (var dir in dirsToUpdate)
         {
