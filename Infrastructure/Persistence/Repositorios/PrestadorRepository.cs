@@ -149,7 +149,8 @@ public class PrestadorRepository : IPrestadorRepository
 
         List<Direccion> dirsToRemove = dirsDB.Where(d => !dirsReq.Any(dr => dr.Id == d.Id)).ToList();
 
-        List<Direccion> dirsToAdd = dirsDB.Where(d => dirsReq.Any(dr => dr.Id == 0)).ToList();
+        // Direcciones nuevas: las que vienen en el request con Id == 0
+        List<Direccion> dirsToAdd = dirsReq.Where(dr => dr.Id == 0).ToList();
 
         List<Direccion> dirsToUpdate = dirsDB.Where(d => dirsReq.Any(dr => dr.Id == d.Id)).ToList();
 
