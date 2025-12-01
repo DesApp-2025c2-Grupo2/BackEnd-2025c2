@@ -86,6 +86,7 @@ public class PrestadorRepository : IPrestadorRepository
         prestador.Documentacion.ForEach(doc => doc.PrestadorId = prestador.Id);
         prestador.Telefonos.ForEach(tel => tel.PrestadorId = prestador.Id);
         prestador.Emails.ForEach(mail => mail.PrestadorId = prestador.Id);
+        prestador.Direcciones.ForEach(dir => dir.PrestadorId = prestador.Id);
 
         // Preparo colecciones del request para que EF no las trackee
         foreach (var doc in prestador.Documentacion)
@@ -105,9 +106,9 @@ public class PrestadorRepository : IPrestadorRepository
                 context.Entry(mail).State = EntityState.Detached;
 
         // Actualizar las colecciones relacionadas
-        SyncCollection(prestadorDB.Telefonos, prestador.Telefonos, t => t.Id);
-        SyncCollection(prestadorDB.Emails, prestador.Emails, e => e.Id);
-        SyncCollection(prestadorDB.Documentacion, prestador.Documentacion, d => d.Id);
+        SyncChildCollection(prestadorDB.Telefonos, prestador.Telefonos, t => t.Id);
+        SyncChildCollection(prestadorDB.Emails, prestador.Emails, e => e.Id);
+        SyncChildCollection(prestadorDB.Documentacion, prestador.Documentacion, d => d.Id);
         await SyncDireccionesAgendas(prestadorDB, prestador);
         await SyncEspecialidades(prestadorDB, especialidadesIds);
         
@@ -142,151 +143,67 @@ public class PrestadorRepository : IPrestadorRepository
 
     private async Task SyncDireccionesAgendas(Prestador prestadorDB, Prestador prestadorRequest)
     {
-        var dirsDB = prestadorDB.Direcciones.ToDictionary(d => d.Id);
-        prestadorDB.Direcciones.Clear();
+        List<Direccion> dirsDB = prestadorDB.Direcciones;
 
-        foreach (var dirReq in prestadorRequest.Direcciones)
+        List<Direccion> dirsReq = prestadorRequest.Direcciones;
+
+        List<Direccion> dirsToRemove = dirsDB.Where(d => !dirsReq.Any(dr => dr.Id == d.Id)).ToList();
+
+        List<Direccion> dirsToAdd = dirsDB.Where(d => dirsReq.Any(dr => dr.Id == 0)).ToList();
+
+        List<Direccion> dirsToUpdate = dirsDB.Where(d => dirsReq.Any(dr => dr.Id == d.Id)).ToList();
+
+        // Eliminamos primero las Agendas asociadas a las direcciones a eliminar
+        foreach (var dir in dirsToRemove)
         {
-            if (dirReq.Id == 0)
-            {
-                // Nueva
-                prestadorDB.Direcciones.Add(dirReq);
-            }
-            else
-            {
-                // Ya existe → usar instancia trackeada
-                var dirDB = dirsDB[dirReq.Id];
-
-                context.Entry(dirDB).CurrentValues.SetValues(dirReq);
-
-                prestadorDB.Direcciones.Add(dirDB);
-            }
-        }
-
-        // Borrar direcciones que ya no están
-        var idsReq = prestadorRequest.Direcciones.Where(d => d.Id != 0).Select(d => d.Id).ToHashSet();
-        var dirsToDelete = dirsDB.Keys.Where(id => !idsReq.Contains(id)).ToList();
-
-        foreach (var id in dirsToDelete)
-        {
-            var d = dirsDB[id];
-
-            // Borrar agendas
             if (prestadorDB is CentroMedico centro)
             {
-                var agendas = centro.Agendas.Where(a => a.DireccionId == id).ToList();
+                var agendas = centro.Agendas.Where(a => a.DireccionId == dir.Id).ToList();
                 foreach (var a in agendas) context.Remove(a);
             }
             if (prestadorDB is Profesional prof)
             {
-                var agendas = prof.Agendas.Where(a => a.DireccionId == id).ToList();
+                var agendas = prof.Agendas.Where(a => a.DireccionId == dir.Id).ToList();
                 foreach (var a in agendas) context.Remove(a);
             }
-
-            context.Remove(d);
         }
+        // Removemos las direcciones
+        foreach (var dir in dirsToRemove) prestadorDB.Direcciones.Remove(dir);
 
-        // Ahora cargamos las agendas que no estaban en la db pero vienen en el request
-        if (prestadorRequest is CentroMedico centroReq && prestadorDB is CentroMedico centroDB)
+        // Agregamos las nuevas direcciones
+        foreach (var dir in dirsToAdd) prestadorDB.Direcciones.Add(dir);
+        
+        // Actualizamos las existentes
+        foreach (var dir in dirsToUpdate)
         {
-            var agendasDB = centroDB.Agendas.ToDictionary(a => a.Id);
-            centroDB.Agendas.Clear();
-            foreach (var agendaReq in centroReq.Agendas)
-            {
-                if (agendaReq.Id == 0)
-                {
-                    // Nueva
-                    centroDB.Agendas.Add(agendaReq);
-                }
-                else
-                {
-                    // Ya existe → usar instancia trackeada
-                    var agendaDB = agendasDB[agendaReq.Id];
-                    context.Entry(agendaDB).CurrentValues.SetValues(agendaReq);
-                    centroDB.Agendas.Add(agendaDB);
-                }
-            }
-            // Borrar agendas que ya no están
-            var idsAgendasReq = centroReq.Agendas.Where(a => a.Id != 0).Select(a => a.Id).ToHashSet();
-            var agendasToDelete = agendasDB.Keys.Where(id => !idsAgendasReq.Contains(id)).ToList();
-            foreach (var id in agendasToDelete)
-            {
-                var a = agendasDB[id];
-                context.Remove(a);
-            }
-        }
-
-        if (prestadorRequest is Profesional profReq && prestadorDB is Profesional profDB)
-        {
-            // puede que profReq.Agendas tenga agendas que ya existen en la db, pero no tiene el atributo escalar de EF cargado
-            // es decir que la agenda del req no tiene el id, apesar de que ya existe en la db, y que debe seguir existiendo
-            var agendasDirReq = profReq.Agendas.ToDictionary(ag => ag.DireccionId);
-            profDB.Agendas.ForEach(agdb =>
-            {
-                if (agendasDirReq.ContainsKey(agdb.DireccionId))
-                {
-                    var agReq = agendasDirReq[agdb.DireccionId];
-                    agReq.Id = agdb.Id;
-                }
-            });
-
-            var agendasDB = profDB.Agendas.ToDictionary(a => a.Id);
-            profDB.Agendas.Clear();
-            foreach (var agendaReq in profReq.Agendas)
-            {
-                if (agendaReq.Id == 0)
-                {
-                    // Nueva
-                    profDB.Agendas.Add(agendaReq);
-                }
-                else
-                {
-                    // Ya existe → usar instancia trackeada
-                    var agendaDB = agendasDB[agendaReq.Id];
-                    context.Entry(agendaDB).CurrentValues.SetValues(agendaReq);
-                    profDB.Agendas.Add(agendaDB);
-                }
-            }
-            // Borrar agendas que ya no están
-            var idsAgendasReq = profReq.Agendas.Where(a => a.Id != 0).Select(a => a.Id).ToHashSet();
-            var agendasToDelete = agendasDB.Keys.Where(id => !idsAgendasReq.Contains(id)).ToList();
-            foreach (var id in agendasToDelete)
-            {
-                var a = agendasDB[id];
-                context.Remove(a);
-            }
-        }
-        else
-        {
-            // No es ni CentroMedico ni Profesional
-            throw new Exception("El prestador no es ni CentroMedico ni Profesional.");
+            var dirReq = dirsReq.First(d => d.Id == dir.Id);
+            context.Entry(dir).CurrentValues.SetValues(dirReq);
         }
     }
 
-    private void SyncCollection<T>(ICollection<T> dbCollection, ICollection<T> newCollection, Func<T, int> getId)
-    where T : class
+    private void SyncChildCollection<T>(ICollection<T> trackedCollection, ICollection<T> incomingCollection, Func<T, int> keySelector) where T : class
     {
-        // 1. Borrar los que no vienen en el request
-        var toRemove = dbCollection
-            .Where(dbItem => !newCollection.Any(n => getId(n) == getId(dbItem)))
-            .ToList();
+        var incomingIds = incomingCollection.Where(x => keySelector(x) != 0).Select(keySelector).ToHashSet();
+        var trackedIds = trackedCollection.Where(x => keySelector(x) != 0).Select(keySelector).ToList();
 
-        foreach (var item in toRemove)
-            dbCollection.Remove(item);
-
-        // 2. Insertar los nuevos (id == 0)
-        var toAdd = newCollection
-            .Where(n => getId(n) == 0)
-            .ToList();
-
-        foreach (var item in toAdd)
-            dbCollection.Add(item);
-
-        // 3. Actualizar los existentes
-        foreach (var newItem in newCollection.Where(n => getId(n) != 0))
+        // 1. Eliminar los que ya no están
+        foreach (var trackedItem in trackedCollection.ToList())
         {
-            var dbItem = dbCollection.First(x => getId(x) == getId(newItem));
-            context.Entry(dbItem).CurrentValues.SetValues(newItem);
+            if (keySelector(trackedItem) != 0 && !incomingIds.Contains(keySelector(trackedItem)))
+                trackedCollection.Remove(trackedItem);
+        }
+
+        // 2. Actualizar los existentes
+        foreach (var incomingItem in incomingCollection.Where(x => keySelector(x) != 0))
+        {
+            var trackedItem = trackedCollection.First(x => keySelector(x) == keySelector(incomingItem));
+            context.Entry(trackedItem).CurrentValues.SetValues(incomingItem);
+        }
+
+        // 3. Agregar nuevos
+        foreach (var incomingItem in incomingCollection.Where(x => keySelector(x) == 0))
+        {
+            trackedCollection.Add(incomingItem);
         }
     }
 
