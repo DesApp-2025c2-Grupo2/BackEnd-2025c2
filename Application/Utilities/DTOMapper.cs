@@ -121,14 +121,27 @@ public static class DTOMapper
             Alta = DateOnly.FromDateTime(prestador.Alta),
             Baja = prestador.Baja.HasValue ? DateOnly.FromDateTime(prestador.Baja.Value) : null,
             Rol = prestador is CentroMedico ? RolMedico.CentroMedico : RolMedico.ProfesionalIndependiente,
-            Agendas = new AgendasResponse()
+            Agendas = new AgendasResponse(),
+            Profesionales = new()
         };
 
         prestador.Especialidades?.ForEach(es => dto.Especialidades.Add(EspecialidadToDTOSimple(es)));
+        CentroMedico? centroDeProf = (prestador as Profesional)?.Centro;
+        if (centroDeProf != null) dto.Centro = CentroMedicoToDTO(centroDeProf);
         (prestador as Profesional)?.Agendas?.ForEach(ag => dto.Agendas.Add(AgendaToDTO(ag)));
+        (prestador as CentroMedico)?.Profesionales.ForEach(pr => dto.Profesionales.Add(ProfesionalToDTO(pr)));
         (prestador as CentroMedico)?.Agendas?.ForEach(ag => dto.Agendas.Add(AgendaToDTO(ag)));
 
         return dto;
+    }
+
+    public static CentroMedicoDTO? CentroMedicoToDTO(CentroMedico centroDeProf)
+    {
+        return new CentroMedicoDTO
+        {
+            Id = centroDeProf.Id,
+            NombreCompleto = centroDeProf.NombreCompleto
+        };
     }
 
     public static AgendaResponse AgendaToDTO(Agenda a)
@@ -245,9 +258,9 @@ public static class DTOMapper
         }
         prestador.Id = prestadorRequest.Id ?? 0;
         if (prestador is Profesional prof)
-            prof.Agendas.ForEach(ag => ag.ProfesionalId = prestadorRequest.Id!.Value);
+            prof.Agendas.ForEach(ag => ag.ProfesionalId = prestadorRequest.Id ?? 0);
         else if (prestador is CentroMedico centro)
-            centro.Agendas.ForEach(ag => ag.CentroMedicoId = prestadorRequest.Id!.Value);
+            centro.Agendas.ForEach(ag => ag.CentroMedicoId = prestadorRequest.Id ?? 0);
         return prestador;
     }
 

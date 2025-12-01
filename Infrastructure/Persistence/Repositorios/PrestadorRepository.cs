@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ public class PrestadorRepository : IPrestadorRepository
             var especialidades = await context.Especialidades.Where(e => especialidadesIds.Contains(e.Id)).ToListAsync();
             prestador.Especialidades = especialidades;
         }
-        if ((prestador as Profesional)!.CentroId != null)
+        if (prestador.Rol == RolMedico.ProfesionalIndependiente && (prestador as Profesional)!.CentroId != null)
         {
             CentroMedico? centro = await context.Prestadores
                 .OfType<CentroMedico>()
