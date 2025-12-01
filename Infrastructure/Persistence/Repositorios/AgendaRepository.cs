@@ -43,6 +43,7 @@ public class AgendaRepository : IAgendaRepository
         else if (agendaMapped is AgendaCentroMedico)
         {
             agendaDB = await context.AgendasCentrosMedicos
+                .Include(a => a.DireccionAtencion)
                 .Include(a => a.Horarios).ThenInclude(h => h.DiasAtencion)
                 .Include(a => a.Horarios).ThenInclude(h => h.Especialidad)
                 .Include(a => a.Horarios).ThenInclude(h => h.ProfesionalAsignado)
@@ -70,6 +71,7 @@ public class AgendaRepository : IAgendaRepository
         else if (agendaMapped is AgendaCentroMedico)
         {
             agendaDB = await context.AgendasCentrosMedicos
+                .Include(a => a.DireccionAtencion)
                 .Include(a => a.Horarios).ThenInclude(h => h.DiasAtencion)
                 .Include(a => a.Horarios).ThenInclude(h => h.Especialidad)
                 .Include(a => a.Horarios).ThenInclude(h => h.ProfesionalAsignado)
