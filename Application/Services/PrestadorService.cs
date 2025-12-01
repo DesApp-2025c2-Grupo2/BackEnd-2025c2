@@ -467,9 +467,18 @@ public class PrestadorService : IPrestadorService
     public async Task<AgendaResponse> UpdateAgendaAsync(AgendaRequest request)
     {
         AgendaResponse response;
-        Agenda agendaMapped = DTOMapper.AgendaToEntity(request);
-        Agenda agendaDB = await agendaRepo.UpdateAsync(agendaMapped);
-        response = DTOMapper.AgendaToDTO(agendaDB);
+        Agenda agendaDB;
+        if (request.HorariosAtencion.Count > 0)
+        {
+            agendaDB = await agendaRepo.UpdateAsync(DTOMapper.AgendaToEntity(request));
+            response = DTOMapper.AgendaToDTO(agendaDB);
+
+        }
+        else
+        {
+            await agendaRepo.ClearAsync(request.Id);
+            response = new AgendaResponse { Id = request.Id, Horarios = new() };
+        }
         return response;
     }
 }
