@@ -5,6 +5,7 @@ using Application.Utilities;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
+using System.Diagnostics;
 
 namespace Application.Services;
 
@@ -471,6 +472,7 @@ public class PrestadorService : IPrestadorService
         if (request.HorariosAtencion.Count > 0)
         {
             agendaDB = await agendaRepo.UpdateAsync(DTOMapper.AgendaToEntity(request));
+            Debug.WriteLine(agendaDB);
             response = DTOMapper.AgendaToDTO(agendaDB);
 
         }

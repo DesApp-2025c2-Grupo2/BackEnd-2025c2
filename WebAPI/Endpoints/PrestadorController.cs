@@ -121,16 +121,16 @@ public class PrestadorController : ControllerBase
         ActionResult result;
         try
         {
-            if (request.HorariosAtencion == null || !request.HorariosAtencion.Any())
+            /*if (request.HorariosAtencion == null || !request.HorariosAtencion.Any())
             {
                 logger.LogWarning("La lista de Horarios de Atención no puede estar vacía.");
                 result = BadRequest("La lista de Horarios de Atención no puede estar vacía.");
             }
             else
-            {
+            {*/
                 AgendaResponse agenda = await prestadorService.UpdateAgendaAsync(request);
                 result = Ok(agenda);
-            }
+            /* } */
         }
         catch (KeyNotFoundException knfEx)
         {

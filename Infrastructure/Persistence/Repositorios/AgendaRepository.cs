@@ -59,6 +59,26 @@ public class AgendaRepository : IAgendaRepository
         await SyncHorariosAtencion(agendaDB!, agendaMapped);
 
         await context.SaveChangesAsync();
+        if (agendaMapped is AgendaProfesional)
+        {
+            agendaDB = await context.AgendasProfesionales
+                .Include(a => a.DireccionAtencion)
+                .Include(a => a.Horarios).ThenInclude(h => h.DiasAtencion)
+                .Include(a => a.Horarios).ThenInclude(h => h.Especialidad)
+                .FirstOrDefaultAsync(a => a.Id == agendaMapped.Id);
+        }
+        else if (agendaMapped is AgendaCentroMedico)
+        {
+            agendaDB = await context.AgendasCentrosMedicos
+                .Include(a => a.Horarios).ThenInclude(h => h.DiasAtencion)
+                .Include(a => a.Horarios).ThenInclude(h => h.Especialidad)
+                .Include(a => a.Horarios).ThenInclude(h => h.ProfesionalAsignado)
+                .FirstOrDefaultAsync(a => a.Id == agendaMapped.Id);
+        }
+        else
+        {
+            throw new InvalidOperationException("Tipo de agenda no soportado.");
+        }
         return agendaDB;
     }
 
