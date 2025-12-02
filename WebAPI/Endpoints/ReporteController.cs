@@ -29,7 +29,7 @@ public class ReporteController : ControllerBase
         {
             ReportesResponse response = await service.GetAllAsync();
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            response.ForEach(rep => rep.FileURL = Path.Combine(baseUrl, rep.FileURL));
+            response.ForEach(rep => rep.FileURL = $"{baseUrl}/{rep.FileURL}");
             result = Ok(response);
         }
         catch (Exception ex)
