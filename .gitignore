@@ -567,6 +567,9 @@ FodyWeavers.xsd
 
 ### Custom ignores or exceptions ###
 
+# Excluir reportes .pdf de la carpeta WebAPI/wwwroot/reports
+WebAPI/wwwroot/reports/**/*.pdf
+
 # Permitir mis scripts SQL en la carpeta de infraestructura
 !Infrastructure/Persistence/DBObjects/Packages/**
 
